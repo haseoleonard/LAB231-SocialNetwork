@@ -33,7 +33,7 @@ public class UsersDAO implements Serializable{
         try{
             con = DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "select email,name,admin,status "
+                String sql = "select email,name,status "
                         + "from Users "
                         + "where email like ? and password like ?";
                 psm = con.prepareStatement(sql);
@@ -44,7 +44,6 @@ public class UsersDAO implements Serializable{
                     if(this.loginUser==null)this.loginUser=new UsersDTO();
                     loginUser.setEmail(rs.getString("email"));
                     loginUser.setName(rs.getNString("name"));
-                    loginUser.setAdmin(rs.getBoolean("admin"));
                     loginUser.setStatus(rs.getBoolean("status"));
                     return true;
                 }
@@ -57,18 +56,18 @@ public class UsersDAO implements Serializable{
         return false;
     }
     
-    public boolean createNewAccount(String email,String password,String name,boolean admin, boolean status) throws SQLException, NamingException{
+    public boolean createNewAccount(String email,String password,String name, boolean status) throws SQLException, NamingException{
         Connection con = null;
         PreparedStatement psm = null;
         try{
             con = DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "insert into Users(email,name,password,admin,status) values(?,?,?,?,?)";
+                String sql = "insert into Users(email,name,password,status) values(?,?,?,?)";
                 psm = con.prepareStatement(sql);
                 psm.setString(1, email);
                 psm.setNString(2, name);
                 psm.setString(3, password);
-                psm.setBoolean(4, admin);
+//                psm.setBoolean(4, admin);
                 psm.setBoolean(5, status);
                 int rs = psm.executeUpdate();
                 if(rs>0)return true;
@@ -80,25 +79,25 @@ public class UsersDAO implements Serializable{
         return false;
     }
     
-    public boolean updateAdminAccount(String email, boolean admin) throws SQLException, NamingException{
-        Connection con = null;
-        PreparedStatement psm = null;
-        try{
-            con = DBHelpers.makeConnection();
-            if(con!=null){              
-                String sql = "Update Users set admin=? where email like ?";
-                psm = con.prepareStatement(sql);
-                psm.setBoolean(1, admin);
-                psm.setString(2, email);
-                int rs = psm.executeUpdate();
-                if(rs>0)return true;
-            }
-        }finally{
-            if(psm!=null)psm.close();
-            if(con!=null)con.close();
-        }
-        return false;
-    }
+//    public boolean updateAdminAccount(String email, boolean admin) throws SQLException, NamingException{
+//        Connection con = null;
+//        PreparedStatement psm = null;
+//        try{
+//            con = DBHelpers.makeConnection();
+//            if(con!=null){              
+//                String sql = "Update Users set admin=? where email like ?";
+//                psm = con.prepareStatement(sql);
+//                psm.setBoolean(1, admin);
+//                psm.setString(2, email);
+//                int rs = psm.executeUpdate();
+//                if(rs>0)return true;
+//            }
+//        }finally{
+//            if(psm!=null)psm.close();
+//            if(con!=null)con.close();
+//        }
+//        return false;
+//    }
     List<UsersDTO> userList;
 
     public List<UsersDTO> getUserList() {
@@ -122,9 +121,9 @@ public class UsersDAO implements Serializable{
                     if(this.userList==null)this.userList=new ArrayList<>();
                     String email = rs.getString("email");
                     String name = rs.getString("name");
-                    boolean admin = rs.getBoolean("admin");
+//                    boolean admin = rs.getBoolean("admin");
                     boolean status = rs.getBoolean("status");
-                    this.userList.add(new UsersDTO(email, name, admin, status));
+                    this.userList.add(new UsersDTO(email, name,status));
                     total++;
                 }
             }
@@ -144,10 +143,10 @@ public class UsersDAO implements Serializable{
         try{
             con = DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "select email,name,admin,status "
+                String sql = "select email,name,status "
                         + "from users "
                         + "where name like ?"
-                        + " and (admin=0 or status=0) ";
+                        + " and status=0";
                 psm = con.prepareStatement(sql);
                 psm.setString(1, "%"+searchName+"%");
                 rs = psm.executeQuery();
@@ -155,9 +154,8 @@ public class UsersDAO implements Serializable{
                     if(this.userList==null)this.userList=new ArrayList<>();
                     String email = rs.getString("email");
                     String name = rs.getString("name");
-                    boolean admin = rs.getBoolean("admin");
                     boolean status = rs.getBoolean("status");
-                    this.userList.add(new UsersDTO(email, name, admin, status));
+                    this.userList.add(new UsersDTO(email, name,status));
                     total++;
                 }
             }

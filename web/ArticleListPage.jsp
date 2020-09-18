@@ -14,12 +14,13 @@
     </head>
     <body>
         <jsp:include page="WEB-INF/jspf/header.jsp"/>
-        <form action="">
+        <form action="DispatchController">
             Search Article by Content<br/>
             <input type="text" name="txtContent" value="${param.txtContent}"/>
             <input type="submit" name="btAction" value="Search Article"/>
+            <input type="submit" name="btAction" value="Create New Article"/>
         </form>
-        <c:set var="" value=""/>
+        <%--<c:set var="" value=""/>--%>
         <c:if test="">
             
         </c:if>

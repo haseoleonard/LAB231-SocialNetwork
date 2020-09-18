@@ -24,6 +24,9 @@ public class DispatchController extends HttpServlet {
     private static final String LOGIN_CONTROLLER = "LoginServlet";
     private static final String LOGOUT_CONTROLLER = "LogoutServlet";
     private static final String CREATE_ACCOUNT_CONTROLLER = "CreateAccountServlet";
+    private static final String SEARCH_ARTICLE_CONTROLLER = "ArticleSearchingServlet";
+    private static final String CREATE_ARTICLE_PAGE="createArticlePage.jsp";
+    private static final String CREATE_ARTICLE_CONTROLLER = "";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -48,6 +51,12 @@ public class DispatchController extends HttpServlet {
                 url=LOGOUT_CONTROLLER;
             }else if(button.equalsIgnoreCase("Create Account")){
                 url=CREATE_ACCOUNT_PAGE;
+            }else if(button.equals("Search Article")){
+                url=SEARCH_ARTICLE_CONTROLLER;
+            }else if(button.equals("Create New Article")){
+                url=CREATE_ARTICLE_CONTROLLER;
+            }else if(button.equals("Create Article")){
+                url="";
             }
 //            else if(button.equalsIgnoreCase("create")){
 //                url=CREATE_ACCOUNT_CONTROLLER;

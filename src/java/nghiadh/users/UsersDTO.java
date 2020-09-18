@@ -14,16 +14,16 @@ import java.io.Serializable;
 public class UsersDTO implements Serializable{
     private String email;
     private String name;
-    private boolean admin;
+//    private boolean admin;
     private boolean status;
 
     public UsersDTO() {
     }
-
-    public UsersDTO(String email, String name, boolean admin, boolean status) {
+//    public UsersDTO(String email, String name, boolean admin, boolean status) {
+    public UsersDTO(String email, String name, boolean status) {
         this.email = email;
         this.name = name;
-        this.admin = admin;
+//        this.admin = admin;
         this.status = status;
     }
 
@@ -43,13 +43,13 @@ public class UsersDTO implements Serializable{
         this.name = name;
     }
 
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
-    }
+//    public boolean isAdmin() {
+//        return admin;
+//    }
+//
+//    public void setAdmin(boolean admin) {
+//        this.admin = admin;
+//    }
 
     public boolean isStatus() {
         return status;

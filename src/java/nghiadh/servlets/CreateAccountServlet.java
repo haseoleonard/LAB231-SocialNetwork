@@ -49,7 +49,7 @@ public class CreateAccountServlet extends HttpServlet {
             String name = request.getParameter("txtName");
             UsersDAO dao = new UsersDAO();
             String hashedPassword = EncodeHelper.toHexString(password);
-            boolean rs = dao.createNewAccount(email, hashedPassword, name, false, false);
+            boolean rs = dao.createNewAccount(email, hashedPassword, name, true);
             if(rs){
                request.setAttribute("CREATE_SUCCESS", rs);
             }

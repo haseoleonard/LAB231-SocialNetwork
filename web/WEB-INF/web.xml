@@ -24,10 +24,20 @@
         <servlet-name>DispatchController</servlet-name>
         <url-pattern>/DispatchController</url-pattern>
     </servlet-mapping>-->
+    <filter>
+        <filter-name>CookieLoginFilter</filter-name>
+        <filter-class>nghiadh.filters.CookieLoginFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>LoginAuthFilter</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CookieLoginFilter</filter-name>
+        <url-pattern>/login.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     <filter-mapping>
         <filter-name>UserManageLoadFilter</filter-name>

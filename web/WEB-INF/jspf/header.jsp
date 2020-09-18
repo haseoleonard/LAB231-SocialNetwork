@@ -5,8 +5,5 @@
             <a href="DispatchController?btAction=Logout">Log Out</a><br/>
             <a href="ArticleListPage.jsp">Article List</a> || 
             <a href="notificationsPage.jsp">Notifications</a>
-            <c:if test="${sessionScope.LOGIN_USER.admin==true}">
-                <a href="userManagementPage.jsp"> || User Verification(Admin Only)</a>
-            </c:if>
             <br/>
         </header>
