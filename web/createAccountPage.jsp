@@ -14,7 +14,7 @@
     </head>
     <body>
         <h1>Create New Account</h1>
-        <form action="CreateAccountServlet" method="POST">
+        <form action="GuestDispatchController" method="POST">
             Email* <input type="text" name="txtEmail" value="${param.txtEmail}"/><br/>
             <c:if test="${not empty requestScope.ERROR.emailLengthErr}">
                 <font style="color: red">${requestScope.ERROR.emailLengthErr}</font><br/>

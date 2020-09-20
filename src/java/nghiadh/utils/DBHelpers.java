@@ -16,7 +16,7 @@ import javax.sql.DataSource;
  *
  * @author haseo
  */
-public class DBHelpers {
+public final class DBHelpers {
     public static Connection makeConnection() throws NamingException, SQLException{
         Context curContext = new InitialContext();
         Context tomcatContext = (Context) curContext.lookup("java:comp/env");

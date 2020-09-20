@@ -7,12 +7,18 @@ package nghiadh.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import nghiadh.posts.PostsDAO;
+import nghiadh.posts.PostsDTO;
 
 /**
  *
@@ -20,7 +26,9 @@ import nghiadh.posts.PostsDAO;
  */
 @WebServlet(name = "ArticleSearchingServlet", urlPatterns = {"/ArticleSearchingServlet"})
 public class ArticleSearchingServlet extends HttpServlet {
-    private static final String ARTICLE_LIST_PAGE="ArticleListPage.jsp";
+    private static final int DEFAULT_PAGE_NUMBER = 1;
+    private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -35,12 +43,30 @@ public class ArticleSearchingServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         String searchedContent = request.getParameter("txtContent");
-        try{
-            if(searchedContent!=null&&!searchedContent.trim().isEmpty()){
+        String hiddenPage = request.getParameter("hiddenPage");
+        try {
+            if (searchedContent != null&&!searchedContent.trim().isEmpty()) {
+                int page = DEFAULT_PAGE_NUMBER;
+                if (hiddenPage!=null&&!hiddenPage.trim().isEmpty()) {
+                    page = Integer.parseInt(hiddenPage);
+                }
                 PostsDAO dao = new PostsDAO();
+                int rs = dao.searchPostByContent(searchedContent, page);
+                int totalPage = dao.getNumberOfPageForPostWithContent(searchedContent);
+                if(rs>0){
+                    List<PostsDTO> resultList = dao.getResultList();
+                    request.setAttribute("RESULT_LIST", resultList);
+                    request.setAttribute("NUMBER_OF_PAGE", totalPage);
+                }
             }
-        }finally{
-            request.getRequestDispatcher(ARTICLE_LIST_PAGE+"?txtContent="+searchedContent);
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+        } catch (SQLException ex) {
+            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NamingException ex) {
+            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            request.getRequestDispatcher(ARTICLE_LIST_PAGE).forward(request, response);
             out.close();
         }
     }

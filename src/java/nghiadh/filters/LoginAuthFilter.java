@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +33,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author haseo
  */
+@MultipartConfig
 public class LoginAuthFilter implements Filter {
     private static final String LOGIN_PAGE = "login.jsp";
     private static final boolean debug = false;

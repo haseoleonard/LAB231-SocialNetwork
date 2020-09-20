@@ -12,5 +12,80 @@ import java.io.Serializable;
  * @author haseo
  */
 public class PostsDTO implements Serializable{
+    private int postID;
+    private String ownerEmail;
+    private String title;
+    private String description;
+    private String content;
+    private String img;
+
+    public PostsDTO() {
+    }
+
+    public PostsDTO(int postID,String ownerEmail, String title, String description, String content, String img) {
+        this.postID = postID;
+        this.ownerEmail=ownerEmail;
+        this.title = title;
+        this.description = description;
+        this.content = content;
+        this.img = img;
+    }
+
+    public PostsDTO(int postID,String ownerEmail, String title, String description, String content) {
+        this.postID = postID;
+        this.ownerEmail=ownerEmail;
+        this.title = title;
+        this.description = description;
+        this.content = content;
+    }
+
+    public int getPostID() {
+        return postID;
+    }
+
+    public void setPostID(int postID) {
+        this.postID = postID;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
+    
     
 }

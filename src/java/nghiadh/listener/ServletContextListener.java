@@ -25,7 +25,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
         List<String> guestAllowList = new ArrayList<>();
         guestAllowList.add("login.jsp");
         guestAllowList.add("LoginServlet");
-        guestAllowList.add("DispatchController");
+        guestAllowList.add("GuestDispatchController");
         guestAllowList.add("createAccountPage.jsp");
         guestAllowList.add("CreateAccountServlet");
         context.setAttribute("GUEST_ALLOW_LIST", guestAllowList);

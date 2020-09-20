@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.Filter;
@@ -25,6 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import nghiadh.posts.PostsDAO;
+import nghiadh.posts.PostsDTO;
+import nghiadh.utils.FileHelpers;
 
 /**
  *
@@ -33,7 +37,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 public class ArticleListLoadingFilter implements Filter {
     
     private static final boolean debug = false;
-
+    private static final int DEFAULT_PAGE_NUMBER = 1;
     // The filter configuration object we are associated with.  If
     // this value is null, this filter instance is not currently
     // configured. 
@@ -155,6 +159,31 @@ public class ArticleListLoadingFilter implements Filter {
         Throwable problem = null;
         
         try {
+            String searchedContent = request.getParameter("txtContent");
+            String hiddenPage = request.getParameter("hiddenPage");
+            if(searchedContent==null||searchedContent.trim().isEmpty()){
+                int page = DEFAULT_PAGE_NUMBER;
+                if(hiddenPage!=null&&!hiddenPage.trim().isEmpty()){
+                    page=Integer.parseInt(hiddenPage);
+                }
+                PostsDAO dao = new PostsDAO();
+                int rs = dao.loadPost(page);
+                if(rs>0){
+                    List<PostsDTO> resultList = dao.getResultList();
+                    request.setAttribute("RESULT_LIST", resultList);                   
+                }
+                int totalPage = dao.getNumberOfPage();
+                request.setAttribute("NUMBER_OF_PAGE", totalPage);
+            }
+            List<PostsDTO> resultList = (List<PostsDTO>) request.getAttribute("RESULT_LIST");
+            String realPath = request.getServletContext().getRealPath("/PostsImg");
+            if(resultList!=null){
+                for(PostsDTO post: resultList){
+                    if(post.getImg()!=null&&!post.getImg().trim().isEmpty()){
+                        FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+                    }
+                }
+            }
             chain.doFilter(wrappedRequest, wrappedResponse);
         } catch (Throwable t) {
             // If an exception is thrown somewhere down the filter chain,

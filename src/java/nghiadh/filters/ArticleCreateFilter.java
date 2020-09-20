@@ -9,22 +9,24 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import nghiadh.users.UsersDAO;
-import nghiadh.users.UsersDTO;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
+import nghiadh.posts.PostError;
 
 /**
  *
  * @author haseo
  */
-public class UserManageLoadFilter implements Filter {
-    
+@MultipartConfig
+public class ArticleCreateFilter implements Filter {
+    private static final String CREATE_ARTICLE_PAGE = "createArticlePage.jsp";
     private static final boolean debug = true;
 
     // The filter configuration object we are associated with.  If
@@ -32,13 +34,13 @@ public class UserManageLoadFilter implements Filter {
     // configured. 
     private FilterConfig filterConfig = null;
     
-    public UserManageLoadFilter() {
+    public ArticleCreateFilter() {
     }    
     
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
 //        if (debug) {
-//            log("UserManageLoadFilter:DoBeforeProcessing");
+//            log("ArticleCreateFilter:DoBeforeProcessing");
 //        }
 
         // Write code here to process the request and/or response before
@@ -66,7 +68,7 @@ public class UserManageLoadFilter implements Filter {
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
 //        if (debug) {
-//            log("UserManageLoadFilter:DoAfterProcessing");
+//            log("ArticleCreateFilter:DoAfterProcessing");
 //        }
 
         // Write code here to process the request and/or response after
@@ -102,21 +104,48 @@ public class UserManageLoadFilter implements Filter {
             throws IOException, ServletException {
         
 //        if (debug) {
-//            log("UserManageLoadFilter:doFilter()");
+//            log("ArticleCreateFilter:doFilter()");
 //        }
         
         doBeforeProcessing(request, response);
         
         Throwable problem = null;
         try {
-            String searchName=request.getParameter("txtName");
-            UsersDAO dao = new UsersDAO();
-            int rs = dao.loadUserList();
-            if(rs>0){
-                List<UsersDTO> userList = dao.getUserList();
-                request.setAttribute("USER_LIST", userList);
+            PostError error = new PostError();
+            boolean foundErr = false;
+            String title = request.getParameter("txtTitle");
+            String description = request.getParameter("txtDescription");
+            String content = request.getParameter("txtContent");
+            Part filePart = ((HttpServletRequest)request).getPart("uploadImg");
+            if(title.trim().length()>100||title.trim().length()<5){
+                error.setTitleLengthErr("Title Length is required and need to be between 5-100 chars");
+                foundErr=true;
             }
-            chain.doFilter(request, response);
+            if(description.trim().length()>200||description.trim().length()<5){
+                error.setDescriptionLengthErr("Description Length is required and need to be between 5-200 chars");
+                foundErr=true;
+            }
+            if(content.trim().length()<50){
+                error.setContentLengthErr("Your Post's Content must be at least 50 Chracters");
+                foundErr=true;
+            }
+            if(filePart.getSize()>0){
+                if(!(filePart.getSubmittedFileName().endsWith(".jpg")
+                        ||filePart.getSubmittedFileName().endsWith(".png")
+                        ||filePart.getSubmittedFileName().endsWith(".ifif")
+                        ||filePart.getSubmittedFileName().endsWith(".jpeg")
+                        ||filePart.getSubmittedFileName().endsWith(".pjp")
+                        ||filePart.getSubmittedFileName().endsWith(".pjpeg"))){
+                    foundErr=true;
+                    error.setFileTypeIncorrectErr("Incorrect File Type Selected");
+                }
+            }
+            if(!foundErr){
+                chain.doFilter(request, response);
+            }else{
+                request.setAttribute("ERROR", error);
+                request.getRequestDispatcher(CREATE_ARTICLE_PAGE).forward(request, response);
+            }
         } catch (Throwable t) {
             // If an exception is thrown somewhere down the filter chain,
             // we still want to execute our after processing, and then
@@ -168,9 +197,9 @@ public class UserManageLoadFilter implements Filter {
     public void init(FilterConfig filterConfig) {        
         this.filterConfig = filterConfig;
         if (filterConfig != null) {
-//            if (debug) {                
-//                log("UserManageLoadFilter:Initializing filter");
-//            }
+            if (debug) {                
+                log("ArticleCreateFilter:Initializing filter");
+            }
         }
     }
 
@@ -180,9 +209,9 @@ public class UserManageLoadFilter implements Filter {
     @Override
     public String toString() {
         if (filterConfig == null) {
-            return ("UserManageLoadFilter()");
+            return ("ArticleCreateFilter()");
         }
-        StringBuffer sb = new StringBuffer("UserManageLoadFilter(");
+        StringBuffer sb = new StringBuffer("ArticleCreateFilter(");
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());

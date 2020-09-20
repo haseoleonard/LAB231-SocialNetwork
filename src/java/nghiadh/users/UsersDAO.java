@@ -44,7 +44,7 @@ public class UsersDAO implements Serializable{
                     if(this.loginUser==null)this.loginUser=new UsersDTO();
                     loginUser.setEmail(rs.getString("email"));
                     loginUser.setName(rs.getNString("name"));
-                    loginUser.setStatus(rs.getBoolean("status"));
+                    loginUser.setStatus(rs.getInt("status"));
                     return true;
                 }
             }
@@ -56,19 +56,19 @@ public class UsersDAO implements Serializable{
         return false;
     }
     
-    public boolean createNewAccount(String email,String password,String name, boolean status) throws SQLException, NamingException{
+    public boolean createNewAccount(String email,String password,String name) throws SQLException, NamingException{
         Connection con = null;
         PreparedStatement psm = null;
         try{
             con = DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "insert into Users(email,name,password,status) values(?,?,?,?)";
+                String sql = "insert into Users(email,name,password) values(?,?,?)";
                 psm = con.prepareStatement(sql);
                 psm.setString(1, email);
                 psm.setNString(2, name);
                 psm.setString(3, password);
 //                psm.setBoolean(4, admin);
-                psm.setBoolean(5, status);
+//                psm.setBoolean(5, status);
                 int rs = psm.executeUpdate();
                 if(rs>0)return true;
             }
@@ -98,92 +98,92 @@ public class UsersDAO implements Serializable{
 //        }
 //        return false;
 //    }
-    List<UsersDTO> userList;
-
-    public List<UsersDTO> getUserList() {
-        return userList;
-    }
+//    List<UsersDTO> userList;
+//
+//    public List<UsersDTO> getUserList() {
+//        return userList;
+//    }
+//    
+//    public int loadNewUserList() throws SQLException, NamingException{
+//        int total = 0;
+//        Connection con = null;
+//        PreparedStatement psm = null;
+//        ResultSet rs = null;
+//        try{
+//            con = DBHelpers.makeConnection();
+//            if(con!=null){
+//                String sql = "select email,name,admin,status "
+//                        + "from users "
+//                        + "where status=0";
+//                psm = con.prepareStatement(sql);
+//                rs = psm.executeQuery();
+//                while(rs.next()){
+//                    if(this.userList==null)this.userList=new ArrayList<>();
+//                    String email = rs.getString("email");
+//                    String name = rs.getString("name");
+////                    boolean admin = rs.getBoolean("admin");
+//                    int status = rs.getInt("status");
+//                    this.userList.add(new UsersDTO(email, name,status));
+//                    total++;
+//                }
+//            }
+//        }finally{
+//            if(rs!=null)rs.close();
+//            if(psm!=null)psm.close();
+//            if(con!=null)con.close();
+//        }
+//        return total;
+//    }
     
-    public int loadUserList() throws SQLException, NamingException{
-        int total = 0;
-        Connection con = null;
-        PreparedStatement psm = null;
-        ResultSet rs = null;
-        try{
-            con = DBHelpers.makeConnection();
-            if(con!=null){
-                String sql = "select email,name,admin,status "
-                        + "from users "
-                        + "where admin=0 or status=0";
-                psm = con.prepareStatement(sql);
-                rs = psm.executeQuery();
-                while(rs.next()){
-                    if(this.userList==null)this.userList=new ArrayList<>();
-                    String email = rs.getString("email");
-                    String name = rs.getString("name");
-//                    boolean admin = rs.getBoolean("admin");
-                    boolean status = rs.getBoolean("status");
-                    this.userList.add(new UsersDTO(email, name,status));
-                    total++;
-                }
-            }
-        }finally{
-            if(rs!=null)rs.close();
-            if(psm!=null)psm.close();
-            if(con!=null)con.close();
-        }
-        return total;
-    }
-    
-    public int loadUserList(String searchName) throws SQLException, NamingException{
-        int total = 0;
-        Connection con = null;
-        PreparedStatement psm = null;
-        ResultSet rs = null;
-        try{
-            con = DBHelpers.makeConnection();
-            if(con!=null){
-                String sql = "select email,name,status "
-                        + "from users "
-                        + "where name like ?"
-                        + " and status=0";
-                psm = con.prepareStatement(sql);
-                psm.setString(1, "%"+searchName+"%");
-                rs = psm.executeQuery();
-                while(rs.next()){
-                    if(this.userList==null)this.userList=new ArrayList<>();
-                    String email = rs.getString("email");
-                    String name = rs.getString("name");
-                    boolean status = rs.getBoolean("status");
-                    this.userList.add(new UsersDTO(email, name,status));
-                    total++;
-                }
-            }
-        }finally{
-            if(rs!=null)rs.close();
-            if(psm!=null)psm.close();
-            if(con!=null)con.close();
-        }
-        return total;
-    }
-    
-    public boolean updateStatusAccount(String email, boolean status) throws SQLException, NamingException{
-        Connection con = null;
-        PreparedStatement psm = null;
-        try{
-            con = DBHelpers.makeConnection();
-            if(con!=null){              
-                String sql = "Update Users set status=? where email like ?";
-                psm = con.prepareStatement(sql);
-                psm.setBoolean(1, status);
-                psm.setString(2, email);
-                int rs = psm.executeUpdate();
-                if(rs>0)return true;
-            }
-        }finally{
-            if(psm!=null)psm.close();
-            if(con!=null)con.close();
-        }
-        return false;
-    }
+//    public int loadNewUserList(String searchName) throws SQLException, NamingException{
+//        int total = 0;
+//        Connection con = null;
+//        PreparedStatement psm = null;
+//        ResultSet rs = null;
+//        try{
+//            con = DBHelpers.makeConnection();
+//            if(con!=null){
+//                String sql = "select email,name,status "
+//                        + "from users "
+//                        + "where name like ?"
+//                        + " and status=0";
+//                psm = con.prepareStatement(sql);
+//                psm.setString(1, "%"+searchName+"%");
+//                rs = psm.executeQuery();
+//                while(rs.next()){
+//                    if(this.userList==null)this.userList=new ArrayList<>();
+//                    String email = rs.getString("email");
+//                    String name = rs.getString("name");
+//                    int status = rs.getInt("status");
+//                    this.userList.add(new UsersDTO(email, name,status));
+//                    total++;
+//                }
+//            }
+//        }finally{
+//            if(rs!=null)rs.close();
+//            if(psm!=null)psm.close();
+//            if(con!=null)con.close();
+//        }
+//        return total;
+//    }
+//    
+//    public boolean updateStatusAccount(String email, int status) throws SQLException, NamingException{
+//        Connection con = null;
+//        PreparedStatement psm = null;
+//        try{
+//            con = DBHelpers.makeConnection();
+//            if(con!=null){              
+//                String sql = "Update Users set status=? where email like ?";
+//                psm = con.prepareStatement(sql);
+//                psm.setInt(1, status);
+//                psm.setString(2, email);
+//                int rs = psm.executeUpdate();
+//                if(rs>0)return true;
+//            }
+//        }finally{
+//            if(psm!=null)psm.close();
+//            if(con!=null)con.close();
+//        }
+//        return false;
+//    }
 }

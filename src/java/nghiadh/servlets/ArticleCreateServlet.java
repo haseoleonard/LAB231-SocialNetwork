@@ -6,28 +6,33 @@
 package nghiadh.servlets;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.security.NoSuchAlgorithmException;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nghiadh.users.UsersDAO;
-import nghiadh.users.UsersError;
-import nghiadh.utils.EncodeHelper;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+import nghiadh.posts.PostsDAO;
+import nghiadh.users.UsersDTO;
+import nghiadh.utils.FileHelpers;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "CreateAccountServlet", urlPatterns = {"/CreateAccountServlet"})
-public class CreateAccountServlet extends HttpServlet {
-    private static final String CREATE_ACCOUNT_PAGE = "createAccountPage.jsp";
+@MultipartConfig
+@WebServlet(name = "ArticleCreateServlet", urlPatterns = {"/ArticleCreateServlet"})
+public class ArticleCreateServlet extends HttpServlet {
+    private static final String CREATE_ARTICLE_PAGE = "createArticlePage.jsp";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -39,33 +44,41 @@ public class CreateAccountServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String url = CREATE_ACCOUNT_PAGE;
-        try {
-            String email = request.getParameter("txtEmail");
-            String password = request.getParameter("txtPassword");
-            String name = request.getParameter("txtName");
-            UsersDAO dao = new UsersDAO();
-            String hashedPassword = EncodeHelper.toHexString(password);
-            boolean rs = dao.createNewAccount(email, hashedPassword, name);
+        try{
+            /* TODO output your page here. You may use following sample code. */
+            HttpSession session = request.getSession(false);
+            UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+            String title = request.getParameter("txtTitle");
+            String description = request.getParameter("txtDescription");
+            String content = request.getParameter("txtContent");
+            String imgUrl = null;
+            Part filePart = request.getPart("uploadImg");
+            if(filePart!=null&&filePart.getSize()>0){
+                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();              
+                fileName = System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."));
+                String filePath = request.getServletContext().getRealPath("/PostsImg/");
+                InputStream fileContent = filePart.getInputStream();
+//                FileHelpers.writeImgToServerFile(filePath+fileName, fileContent);
+//                imgUrl=request.getContextPath()+"/PostsImg/"+fileName;
+                FileHelpers.writeImgToServerFile("D:\\PostsImg\\"+fileName, fileContent);
+                imgUrl="D:/PostsImg/"+fileName;
+//                System.out.println(imgUrl);
+            }
+            PostsDAO dao = new PostsDAO();
+            boolean rs = dao.createNewPost(title, description, content, imgUrl, loginUser.getEmail());
             if(rs){
-               request.setAttribute("CREATE_SUCCESS", rs);
+                request.setAttribute("SUCCESS", "SUCCESS");
+            }else{
+                request.setAttribute("FAILED", "FAILED");
             }
         } catch (SQLException ex) {
-            if(ex.getMessage().contains("duplicate")){
-                UsersError error = new UsersError();
-                error.setEmailExistedErr("Email Existed!!!");
-                request.setAttribute("ERROR", error);
-            }
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ArticleCreateServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NamingException ex) {
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ArticleCreateServlet.class.getName()).log(Level.SEVERE, null, ex);
         }finally{
-            request.getRequestDispatcher(url).forward(request, response);
+            request.getRequestDispatcher(CREATE_ARTICLE_PAGE).forward(request, response);
             out.close();
         }
     }

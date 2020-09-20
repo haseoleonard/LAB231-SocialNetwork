@@ -15,12 +15,12 @@ public class UsersDTO implements Serializable{
     private String email;
     private String name;
 //    private boolean admin;
-    private boolean status;
+    private int status;
 
     public UsersDTO() {
     }
 //    public UsersDTO(String email, String name, boolean admin, boolean status) {
-    public UsersDTO(String email, String name, boolean status) {
+    public UsersDTO(String email, String name, int status) {
         this.email = email;
         this.name = name;
 //        this.admin = admin;
@@ -51,11 +51,11 @@ public class UsersDTO implements Serializable{
 //        this.admin = admin;
 //    }
 
-    public boolean isStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(int status) {
         this.status = status;
     }
     

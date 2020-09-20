@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author haseo
  */
-public class EncodeHelper {
+public final class EncodeHelper {
     private static byte[] getSHA(String input) throws NoSuchAlgorithmException{
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         return md.digest(input.getBytes(StandardCharsets.UTF_8));

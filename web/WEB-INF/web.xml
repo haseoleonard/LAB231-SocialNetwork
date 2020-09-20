@@ -12,10 +12,6 @@
         <filter-name>CreateAccountFilter</filter-name>
         <filter-class>nghiadh.filters.CreateAccountFilter</filter-class>
     </filter>
-    <filter>
-        <filter-name>UserManageLoadFilter</filter-name>
-        <filter-class>nghiadh.filters.UserManageLoadFilter</filter-class>
-    </filter>
     <!--    <servlet>
         <servlet-name>DispatchController</servlet-name>
         <servlet-class>nghiadh.servlets.DispatchController</servlet-class>
@@ -27,6 +23,14 @@
     <filter>
         <filter-name>CookieLoginFilter</filter-name>
         <filter-class>nghiadh.filters.CookieLoginFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>ArticleLoadFilter</filter-name>
+        <filter-class>nghiadh.filters.ArticleLoadFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>ArticleCreateFilter</filter-name>
+        <filter-class>nghiadh.filters.ArticleCreateFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>LoginAuthFilter</filter-name>
@@ -40,9 +44,16 @@
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>UserManageLoadFilter</filter-name>
-        <url-pattern>/userManagementPage.jsp</url-pattern>
+        <filter-name>ArticleCreateFilter</filter-name>
+        <url-pattern>/ArticleCreateServlet</url-pattern>
         <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ArticleLoadFilter</filter-name>
+        <url-pattern>/ArticlePage.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     <filter-mapping>
         <filter-name>CreateAccountFilter</filter-name>

@@ -14,7 +14,7 @@
     </head>
     <body>
         <h1>Login Form</h1>
-        <form action="DispatchController" method="POST">
+        <form action="GuestDispatchController" method="POST">
             Username <input type="text" name="txtUsername"/><br/>
             Password <input type="password" name="txtPassword"/><br/>
             <c:if test="${not empty requestScope.error}">

@@ -7,27 +7,22 @@ package nghiadh.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nghiadh.users.UsersDAO;
-import nghiadh.users.UsersError;
-import nghiadh.utils.EncodeHelper;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "CreateAccountServlet", urlPatterns = {"/CreateAccountServlet"})
-public class CreateAccountServlet extends HttpServlet {
+@WebServlet(name = "GuestDispatchController", urlPatterns = {"/GuestDispatchController"})
+public class GuestDispatchController extends HttpServlet {
+    private static final String LOGIN_PAGE = "login.jsp";
     private static final String CREATE_ACCOUNT_PAGE = "createAccountPage.jsp";
+    private static final String LOGIN_CONTROLLER = "LoginServlet";
+    private static final String CREATE_ACCOUNT_CONTROLLER = "CreateAccountServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -39,34 +34,24 @@ public class CreateAccountServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String url = CREATE_ACCOUNT_PAGE;
-        try {
-            String email = request.getParameter("txtEmail");
-            String password = request.getParameter("txtPassword");
-            String name = request.getParameter("txtName");
-            UsersDAO dao = new UsersDAO();
-            String hashedPassword = EncodeHelper.toHexString(password);
-            boolean rs = dao.createNewAccount(email, hashedPassword, name);
-            if(rs){
-               request.setAttribute("CREATE_SUCCESS", rs);
+        String url = LOGIN_PAGE;
+        try{
+            String button = request.getParameter("btAction");
+            
+            if(button==null){
+            }else if(button.equalsIgnoreCase("login")){
+                url=LOGIN_CONTROLLER;
+            }else if(button.equalsIgnoreCase("Create Account")){
+                url=CREATE_ACCOUNT_PAGE;
+            }else if(button.equalsIgnoreCase("Create")){
+                url=CREATE_ACCOUNT_CONTROLLER;
             }
-        } catch (SQLException ex) {
-            if(ex.getMessage().contains("duplicate")){
-                UsersError error = new UsersError();
-                error.setEmailExistedErr("Email Existed!!!");
-                request.setAttribute("ERROR", error);
-            }
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
+            
         }finally{
             request.getRequestDispatcher(url).forward(request, response);
-            out.close();
+            if(out!=null)out.close();
         }
     }
 

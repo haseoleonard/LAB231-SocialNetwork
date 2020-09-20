@@ -8,6 +8,7 @@ package nghiadh.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,16 +18,14 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author haseo
  */
+@MultipartConfig
 @WebServlet(name = "DispatchController", urlPatterns = {"/DispatchController"})
 public class DispatchController extends HttpServlet {
     private static final String LOGIN_PAGE = "login.jsp";
-    private static final String CREATE_ACCOUNT_PAGE = "createAccountPage.jsp";
-    private static final String LOGIN_CONTROLLER = "LoginServlet";
     private static final String LOGOUT_CONTROLLER = "LogoutServlet";
-    private static final String CREATE_ACCOUNT_CONTROLLER = "CreateAccountServlet";
     private static final String SEARCH_ARTICLE_CONTROLLER = "ArticleSearchingServlet";
     private static final String CREATE_ARTICLE_PAGE="createArticlePage.jsp";
-    private static final String CREATE_ARTICLE_CONTROLLER = "";
+    private static final String CREATE_ARTICLE_CONTROLLER = "ArticleCreateServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -45,22 +44,16 @@ public class DispatchController extends HttpServlet {
             String button = request.getParameter("btAction");
             
             if(button==null){
-            }else if(button.equalsIgnoreCase("login")){
-                url=LOGIN_CONTROLLER;
             }else if(button.equalsIgnoreCase("logout")){
                 url=LOGOUT_CONTROLLER;
-            }else if(button.equalsIgnoreCase("Create Account")){
-                url=CREATE_ACCOUNT_PAGE;
             }else if(button.equals("Search Article")){
                 url=SEARCH_ARTICLE_CONTROLLER;
             }else if(button.equals("Create New Article")){
-                url=CREATE_ARTICLE_CONTROLLER;
+                url=CREATE_ARTICLE_PAGE;
             }else if(button.equals("Create Article")){
-                url="";
+                url=CREATE_ARTICLE_CONTROLLER;
             }
-//            else if(button.equalsIgnoreCase("create")){
-//                url=CREATE_ACCOUNT_CONTROLLER;
-//            }
+            
         }finally{
             request.getRequestDispatcher(url).forward(request, response);
             if(out!=null)out.close();

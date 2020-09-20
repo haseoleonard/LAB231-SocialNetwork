@@ -14,15 +14,29 @@
     </head>
     <body>
         <jsp:include page="WEB-INF/jspf/header.jsp"/>
+        <h3>Article List</h3>
         <form action="DispatchController">
             Search Article by Content<br/>
             <input type="text" name="txtContent" value="${param.txtContent}"/>
             <input type="submit" name="btAction" value="Search Article"/>
             <input type="submit" name="btAction" value="Create New Article"/>
         </form>
-        <%--<c:set var="" value=""/>--%>
-        <c:if test="">
-            
+        <c:if test="${not empty requestScope.RESULT_LIST}">
+            <c:forEach var="post" items="${requestScope.RESULT_LIST}">
+                <div style="border: yellow solid">
+                    <a href="ArticlePage.jsp?postID=${post.postID}">${post.title}</a>
+                    <p>${post.description}</p>
+                    <c:if test="${not empty post.img}">
+                        <!--<img src="file:${post.img}"/>-->
+                        <img src="PostsImg/${post.img}"/>                       
+                    </c:if>
+                </div>
+            </c:forEach>
+            <c:forEach begin="1" end="${requestScope.NUMBER_OF_PAGE}" varStatus="i">
+                <a href="DispatchController?btAction=Search+Article&txtContent=${param.txtContent}&hiddenPage=${i.count}">
+                    ${i.count}
+                </a>
+            </c:forEach>
         </c:if>
     </body>
 </html>
