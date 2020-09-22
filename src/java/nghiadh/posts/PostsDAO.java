@@ -20,7 +20,7 @@ import nghiadh.utils.DBHelpers;
  * @author haseo
  */
 public class PostsDAO implements Serializable{
-    private static final int POST_PER_LOAD = 1;
+    private static final double POST_PER_LOAD = 20;
     private PostsDTO requestPost;
 
     public PostsDTO getRequestPost() {
@@ -125,8 +125,8 @@ public class PostsDAO implements Serializable{
                         + "FETCH NEXT ? rows only";     
                 psm = con.prepareStatement(sql);
                 psm.setNString(1, "%"+searchedContent+"%");
-                psm.setInt(2, (page-1)*POST_PER_LOAD);
-                psm.setInt(3, POST_PER_LOAD);
+                psm.setInt(2, (page-1)*(int)POST_PER_LOAD);
+                psm.setInt(3, (int)POST_PER_LOAD);
                 rs = psm.executeQuery();
                 while(rs.next()){
                     if(this.resultList==null)this.resultList=new ArrayList<>();
@@ -148,19 +148,30 @@ public class PostsDAO implements Serializable{
         return result;
     }
     
-    public int getPostListByEmail() throws SQLException{
-        int totalPost = 0;
+    public String getPostIDStringByEmail(String ownerEmail) throws SQLException, NamingException{
+        StringBuilder postIDStringBuilder = new StringBuilder();
         Connection con = null;
         PreparedStatement psm = null;
         ResultSet rs = null;
         try {
-            
+            con = DBHelpers.makeConnection();
+            if(con!=null){
+                String sql = "select postID from Posts where status=1 and email like ?";
+                psm = con.prepareStatement(sql);
+                psm.setString(1, ownerEmail);
+                rs = psm.executeQuery();
+                while(rs.next()){
+                    postIDStringBuilder.append(rs.getInt("postID"));
+                    postIDStringBuilder.append(",");
+                }
+                postIDStringBuilder.deleteCharAt(postIDStringBuilder.length()-1);
+            }
         }finally{
             if(rs!=null)rs.close();
             if(psm!=null)psm.close();
             if(con!=null)con.close();
         }
-        return totalPost;
+        return postIDStringBuilder.toString();
     }
     
     public int loadPost(int page) throws NamingException, SQLException{
@@ -178,8 +189,8 @@ public class PostsDAO implements Serializable{
                         + "Offset ? rows "
                         + "FETCH NEXT ? rows only";     
                 psm = con.prepareStatement(sql);
-                psm.setInt(1, (page-1)*POST_PER_LOAD);
-                psm.setInt(2, POST_PER_LOAD);
+                psm.setInt(1, (page-1)*(int)POST_PER_LOAD);
+                psm.setInt(2, (int)POST_PER_LOAD);
                 rs = psm.executeQuery();
                 while(rs.next()){
                     if(this.resultList==null)this.resultList=new ArrayList<>();

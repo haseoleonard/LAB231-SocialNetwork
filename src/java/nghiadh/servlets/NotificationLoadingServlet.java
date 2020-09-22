@@ -17,19 +17,20 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import nghiadh.notifications.NotificationsDAO;
+import nghiadh.notifications.NotificationsDTO;
 import nghiadh.posts.PostsDAO;
-import nghiadh.posts.PostsDTO;
-import nghiadh.utils.FileHelpers;
+import nghiadh.users.UsersDTO;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "ArticleSearchingServlet", urlPatterns = {"/ArticleSearchingServlet"})
-public class ArticleSearchingServlet extends HttpServlet {
+@WebServlet(name = "NotificationLoadingServlet", urlPatterns = {"/NotificationLoadingServlet"})
+public class NotificationLoadingServlet extends HttpServlet {
+    private static final String NOTIFICATION_PAGE="notificationPage.jsp";
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
-
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -43,41 +44,38 @@ public class ArticleSearchingServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String searchedContent = request.getParameter("txtContent");
-        String hiddenPage = request.getParameter("hiddenPage");
         try {
-            if (searchedContent == null||searchedContent.trim().isEmpty()) {
-                searchedContent="";
-            }
-            int page = DEFAULT_PAGE_NUMBER;
-            if (hiddenPage!=null&&!hiddenPage.trim().isEmpty()) {
-                page = Integer.parseInt(hiddenPage);
-                if(page<DEFAULT_PAGE_NUMBER)page=DEFAULT_PAGE_NUMBER;
-            }
-            PostsDAO dao = new PostsDAO();
-            int rs = dao.searchPostByContent(searchedContent, page);
-            int totalPage = dao.getNumberOfPageForPostWithContent(searchedContent);
-            if(rs>0){                
-                List<PostsDTO> resultList = dao.getResultList();
-                request.setAttribute("RESULT_LIST", resultList);
-                request.setAttribute("NUMBER_OF_PAGE", totalPage);
-                String realPath = request.getServletContext().getRealPath("/PostsImg");
-                if(resultList!=null){
-                for(PostsDTO post: resultList){
-                    if(post.getImg()!=null&&!post.getImg().trim().isEmpty()){
-                        FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+            HttpSession session = request.getSession(false);
+            if(session!=null){
+                int page=DEFAULT_PAGE_NUMBER;
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                String txtPage = request.getParameter("page");
+                if(txtPage!=null&&!txtPage.trim().isEmpty()){
+                    page=Integer.parseInt(txtPage);
+                    if(page<DEFAULT_PAGE_NUMBER)page=DEFAULT_PAGE_NUMBER;
+                }
+                PostsDAO postsDAO = new PostsDAO();
+                String postIDString = postsDAO.getPostIDStringByEmail(loginUser.getEmail());
+                if(postIDString!=null&&!postIDString.trim().isEmpty()){
+                    NotificationsDAO notificationsDAO = new NotificationsDAO();
+                    int totalPage = notificationsDAO.getNumberOfNotificationPage(postIDString);
+                    if(totalPage>0){
+                        request.setAttribute("TOTAL_NOTIFY_PAGE", totalPage);
+                        int rs = notificationsDAO.getNotificationByPostID(postIDString, page);
+                        if(rs>0){
+                            List<NotificationsDTO> notificationList = notificationsDAO.getNotificationsList();
+                            request.setAttribute("NOTIFICATION_LIST", notificationList);
+                        }
                     }
                 }
             }
-            }
-        } catch (NumberFormatException ex) {
-            ex.printStackTrace();
-        } catch (SQLException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }catch(NumberFormatException ex){
+        }catch (SQLException ex) {
+            Logger.getLogger(NotificationLoadingServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            request.getRequestDispatcher(ARTICLE_LIST_PAGE).forward(request, response);
+            Logger.getLogger(NotificationLoadingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            request.getRequestDispatcher(NOTIFICATION_PAGE).forward(request, response);
             out.close();
         }
     }

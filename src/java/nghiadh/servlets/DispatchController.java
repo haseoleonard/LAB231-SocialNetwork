@@ -31,6 +31,7 @@ public class DispatchController extends HttpServlet {
     private static final String ADD_COMMENT_CONTROLLER = "UserAddCommentServlet";
     private static final String DELETE_COMMENT_CONTROLLER = "UserDeleteCommentServlet";
     private static final String USER_REACT_CONTROLLER = "UserReactToPostServlet";
+    private static final String LOAD_NOTIFICATION_CONTROLLER ="NotificationLoadingServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -67,6 +68,8 @@ public class DispatchController extends HttpServlet {
                 url=DELETE_COMMENT_CONTROLLER;
             }else if(button.equals("Like")||button.equals("Dislike")){
                 url=USER_REACT_CONTROLLER;
+            }else if(button.equals("loadNotification")){
+                url=LOAD_NOTIFICATION_CONTROLLER;
             }
             
         }finally{

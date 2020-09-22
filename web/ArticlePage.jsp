@@ -31,7 +31,7 @@
                     <input type="submit" name="btAction" value="Like"/>
                     <input type="submit" name="btAction" value="Dislike"/>
                     <c:if test="${requestScope.LOADED_ARTICLE.ownerEmail eq sessionScope.LOGIN_USER.email}">
-                        <a href="DispatchController?btAction=Delete+Article&postID=${requestScope.LOADED_ARTICLE.postID}&ownerEmail=${requestScope.LOADED_ARTICLE.ownerEmail}">
+                        <a href="DispatchController?btAction=Delete+Article&postID=${requestScope.LOADED_ARTICLE.postID}&ownerEmail=${requestScope.LOADED_ARTICLE.ownerEmail}" onclick="return confirm('Are you sure to delete this Article ?')">
                             Delete Post
                         </a>
                     </c:if>
@@ -53,7 +53,7 @@
                                     <input type="hidden" name="postID" value="${requestScope.LOADED_ARTICLE.postID}"/>
                                     <input type="hidden" name="commentID" value="${comment.commentID}"/>
                                     <input type="hidden" name="commenterEmail"value="${comment.commenterEmail}"/>
-                                    <input type="submit" name="btAction" value="Delete Comment"/>
+                                    <input type="submit" name="btAction" value="Delete Comment" onclick="return confirm('Are you sure to delete this Comment ?')"/>
                                 </form>
                             </c:if>
                             <br/>

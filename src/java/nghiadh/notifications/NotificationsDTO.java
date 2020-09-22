@@ -14,15 +14,15 @@ import java.io.Serializable;
 public class NotificationsDTO implements Serializable{
     private String triggerEmail;
     private int triggerPostID;
-    private int eventType;
+    private String eventName;
 
     public NotificationsDTO() {
     }
 
-    public NotificationsDTO(String triggerEmail, int triggerPostID, int eventType) {
+    public NotificationsDTO(String triggerEmail, int triggerPostID, String eventName) {
         this.triggerEmail = triggerEmail;
         this.triggerPostID = triggerPostID;
-        this.eventType = eventType;
+        this.eventName = eventName;
     }
 
     public String getTriggerEmail() {
@@ -41,12 +41,12 @@ public class NotificationsDTO implements Serializable{
         this.triggerPostID = triggerPostID;
     }
 
-    public int getEventType() {
-        return eventType;
+    public String getEventName() {
+        return eventName;
     }
 
-    public void setEventType(int eventType) {
-        this.eventType = eventType;
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
     }
     
 }
