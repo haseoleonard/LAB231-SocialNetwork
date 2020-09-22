@@ -101,7 +101,7 @@
     </welcome-file-list>
     <error-page>
         <error-code>404</error-code>
-        <location>/notificationsPage.jsp</location>
+        <location>/ResourceNotFound.jsp</location>
     </error-page>
     <resource-ref>
         <res-ref-name>DB</res-ref-name>

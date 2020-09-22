@@ -29,7 +29,7 @@ import nghiadh.users.UsersDTO;
  */
 @WebServlet(name = "NotificationLoadingServlet", urlPatterns = {"/NotificationLoadingServlet"})
 public class NotificationLoadingServlet extends HttpServlet {
-    private static final String NOTIFICATION_PAGE="notificationPage.jsp";
+    private static final String NOTIFICATION_PAGE="notificationsPage.jsp";
     private static final int DEFAULT_PAGE_NUMBER = 1;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
