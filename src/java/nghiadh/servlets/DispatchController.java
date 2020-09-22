@@ -26,6 +26,11 @@ public class DispatchController extends HttpServlet {
     private static final String SEARCH_ARTICLE_CONTROLLER = "ArticleSearchingServlet";
     private static final String CREATE_ARTICLE_PAGE="createArticlePage.jsp";
     private static final String CREATE_ARTICLE_CONTROLLER = "ArticleCreateServlet";
+    private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
+    private static final String DELETE_ARTICLE_CONTROLLER = "ArticleDeleteServlet";
+    private static final String ADD_COMMENT_CONTROLLER = "UserAddCommentServlet";
+    private static final String DELETE_COMMENT_CONTROLLER = "UserDeleteCommentServlet";
+    private static final String USER_REACT_CONTROLLER = "UserReactToPostServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -52,6 +57,16 @@ public class DispatchController extends HttpServlet {
                 url=CREATE_ARTICLE_PAGE;
             }else if(button.equals("Create Article")){
                 url=CREATE_ARTICLE_CONTROLLER;
+            }else if(button.equals("loadArticle")){
+                url=LOAD_ARTICLE_CONTROLLER;
+            }else if(button.equals("Delete Article")){
+                url=DELETE_ARTICLE_CONTROLLER;
+            }else if(button.equals("Comment")){
+                url=ADD_COMMENT_CONTROLLER;
+            }else if(button.equals("Delete Comment")){
+                url=DELETE_COMMENT_CONTROLLER;
+            }else if(button.equals("Like")||button.equals("Dislike")){
+                url=USER_REACT_CONTROLLER;
             }
             
         }finally{

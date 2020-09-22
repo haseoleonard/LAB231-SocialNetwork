@@ -1,0 +1,5 @@
+<%-- any content can be specified here e.g.: --%>
+<%@ page pageEncoding="UTF-8" %>
+        <header>
+            <a href=""><h1>Some kind of Social Network</h1></a>
+        </header>

@@ -4,10 +4,10 @@
         <filter-name>LoginAuthFilter</filter-name>
         <filter-class>nghiadh.filters.LoginAuthFilter</filter-class>
     </filter>
-    <filter>
+    <!--    <filter>
         <filter-name>ArticleListLoadingFilter</filter-name>
         <filter-class>nghiadh.filters.ArticleListLoadingFilter</filter-class>
-    </filter>
+    </filter>-->
     <filter>
         <filter-name>CreateAccountFilter</filter-name>
         <filter-class>nghiadh.filters.CreateAccountFilter</filter-class>
@@ -24,13 +24,33 @@
         <filter-name>CookieLoginFilter</filter-name>
         <filter-class>nghiadh.filters.CookieLoginFilter</filter-class>
     </filter>
-    <filter>
+    <!--    <filter>
         <filter-name>ArticleLoadFilter</filter-name>
         <filter-class>nghiadh.filters.ArticleLoadFilter</filter-class>
-    </filter>
+    </filter>-->
     <filter>
         <filter-name>ArticleCreateFilter</filter-name>
         <filter-class>nghiadh.filters.ArticleCreateFilter</filter-class>
+    </filter>
+    <!--    <filter-mapping>
+        <filter-name>ArticleLoadFilter</filter-name>
+        <url-pattern>/ArticlePage.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>-->
+    <!--    <filter-mapping>
+        <filter-name>ArticleListLoadingFilter</filter-name>
+        <url-pattern>/ArticleListPage.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>-->
+    <filter>
+        <filter-name>ArticleDeleteFilter</filter-name>
+        <filter-class>nghiadh.filters.ArticleDeleteFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>CommentCreateFilter</filter-name>
+        <filter-class>nghiadh.filters.CommentCreateFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>LoginAuthFilter</filter-name>
@@ -44,26 +64,26 @@
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     <filter-mapping>
+        <filter-name>ArticleDeleteFilter</filter-name>
+        <url-pattern>/ArticleDeleteServlet</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>CommentCreateFilter</filter-name>
+        <url-pattern>/UserAddCommentServlet</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
         <filter-name>ArticleCreateFilter</filter-name>
         <url-pattern>/ArticleCreateServlet</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>ArticleLoadFilter</filter-name>
-        <url-pattern>/ArticlePage.jsp</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
         <filter-name>CreateAccountFilter</filter-name>
         <url-pattern>/CreateAccountServlet</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>ArticleListLoadingFilter</filter-name>
-        <url-pattern>/ArticleListPage.jsp</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
@@ -79,6 +99,10 @@
     <welcome-file-list>
         <welcome-file>DispatchController</welcome-file>
     </welcome-file-list>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/notificationsPage.jsp</location>
+    </error-page>
     <resource-ref>
         <res-ref-name>DB</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>

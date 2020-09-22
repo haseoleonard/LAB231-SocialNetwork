@@ -24,7 +24,7 @@
         <c:if test="${not empty requestScope.RESULT_LIST}">
             <c:forEach var="post" items="${requestScope.RESULT_LIST}">
                 <div style="border: yellow solid">
-                    <a href="ArticlePage.jsp?postID=${post.postID}">${post.title}</a>
+                    <a href="DispatchController?btAction=loadArticle&postID=${post.postID}">${post.title}</a>
                     <p>${post.description}</p>
                     <c:if test="${not empty post.img}">
                         <!--<img src="file:${post.img}"/>-->

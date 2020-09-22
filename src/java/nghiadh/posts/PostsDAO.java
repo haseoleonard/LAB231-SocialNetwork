@@ -148,6 +148,21 @@ public class PostsDAO implements Serializable{
         return result;
     }
     
+    public int getPostListByEmail() throws SQLException{
+        int totalPost = 0;
+        Connection con = null;
+        PreparedStatement psm = null;
+        ResultSet rs = null;
+        try {
+            
+        }finally{
+            if(rs!=null)rs.close();
+            if(psm!=null)psm.close();
+            if(con!=null)con.close();
+        }
+        return totalPost;
+    }
+    
     public int loadPost(int page) throws NamingException, SQLException{
         int total =0;
         Connection con = null;
@@ -208,7 +223,7 @@ public class PostsDAO implements Serializable{
         }
         return false;
     }
-    public boolean setPostToDelete(String postID) throws NamingException, SQLException{
+    public boolean setPostToDelete(int postID) throws NamingException, SQLException{
         Connection con = null;
         PreparedStatement psm = null;
         try{
@@ -216,7 +231,7 @@ public class PostsDAO implements Serializable{
             if(con!=null){
                 String sql = "Update Posts Set status=2 where postID=?";
                 psm = con.prepareStatement(sql);
-                psm.setInt(1, Integer.parseInt(postID));
+                psm.setInt(1, postID);
                 int rs = psm.executeUpdate();
                 if(rs>0)return true;
             }

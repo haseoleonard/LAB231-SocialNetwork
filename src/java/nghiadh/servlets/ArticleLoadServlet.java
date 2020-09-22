@@ -17,18 +17,22 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nghiadh.comments.CommentsDAO;
+import nghiadh.comments.CommentsDTO;
 import nghiadh.posts.PostsDAO;
 import nghiadh.posts.PostsDTO;
+import nghiadh.reactionType.ReactionTypeDAO;
+import nghiadh.reactions.ReactionsDAO;
 import nghiadh.utils.FileHelpers;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "ArticleSearchingServlet", urlPatterns = {"/ArticleSearchingServlet"})
-public class ArticleSearchingServlet extends HttpServlet {
-    private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
+@WebServlet(name = "ArticleLoadServlet", urlPatterns = {"/ArticleLoadServlet"})
+public class ArticleLoadServlet extends HttpServlet {
+
+    private static final String ARTICLE_PAGE = "ArticlePage.jsp";
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -43,40 +47,49 @@ public class ArticleSearchingServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String searchedContent = request.getParameter("txtContent");
-        String hiddenPage = request.getParameter("hiddenPage");
         try {
-            if (searchedContent == null||searchedContent.trim().isEmpty()) {
-                searchedContent="";
+            /* TODO output your page here. You may use following sample code. */
+            String postID = request.getParameter("postID");
+            int iPostID = 0;
+            if (postID != null && !postID.trim().isEmpty()) {
+                iPostID = Integer.parseInt(postID);
             }
-            int page = DEFAULT_PAGE_NUMBER;
-            if (hiddenPage!=null&&!hiddenPage.trim().isEmpty()) {
-                page = Integer.parseInt(hiddenPage);
-            }
-            PostsDAO dao = new PostsDAO();
-            int rs = dao.searchPostByContent(searchedContent, page);
-            int totalPage = dao.getNumberOfPageForPostWithContent(searchedContent);
-            if(rs>0){                
-                List<PostsDTO> resultList = dao.getResultList();
-                request.setAttribute("RESULT_LIST", resultList);
-                request.setAttribute("NUMBER_OF_PAGE", totalPage);
-                String realPath = request.getServletContext().getRealPath("/PostsImg");
-                if(resultList!=null){
-                for(PostsDTO post: resultList){
-                    if(post.getImg()!=null&&!post.getImg().trim().isEmpty()){
-                        FileHelpers.copyImgToContextFolder(realPath, post.getImg());
-                    }
+            PostsDAO postsDAO = new PostsDAO();
+            CommentsDAO commentDAO = new CommentsDAO();
+            ReactionsDAO reactionsDAO = new ReactionsDAO();
+            ReactionTypeDAO reactionsTypeDAO = new ReactionTypeDAO();
+
+            boolean rs = postsDAO.getRequestedPost(iPostID);
+            if (rs) {
+                PostsDTO post = postsDAO.getRequestPost();
+                if (post.getImg() != null && !post.getImg().trim().isEmpty()) {
+                    String realPath = request.getServletContext().getRealPath("/PostsImg");
+                    FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+                }
+                request.setAttribute("LOADED_ARTICLE", post);
+                //
+                int reactionType = reactionsTypeDAO.getReactionTypeByName("Like");
+                int numberOfLike = reactionsDAO.getNumberOfReaction(iPostID, reactionType);
+                request.setAttribute("NUMBER_OF_LIKE", numberOfLike);
+                //
+                reactionType = reactionsTypeDAO.getReactionTypeByName("Dislike");
+                int numberOfDislike = reactionsDAO.getNumberOfReaction(iPostID, reactionType);
+                request.setAttribute("NUMBER_OF_DISLIKE", numberOfDislike);
+                //
+                int totalComment = commentDAO.loadCommentListOnPost(iPostID);
+                request.setAttribute("NUMBER_OF_COMMENT", totalComment);
+                if (totalComment > 0) {
+                    List<CommentsDTO> commentList = commentDAO.getCommentList();
+                    request.setAttribute("LOADED_COMMENT", commentList);
                 }
             }
-            }
         } catch (NumberFormatException ex) {
-            ex.printStackTrace();
         } catch (SQLException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ArticleLoadServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ArticleLoadServlet.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            request.getRequestDispatcher(ARTICLE_LIST_PAGE).forward(request, response);
+            request.getRequestDispatcher(ARTICLE_PAGE).forward(request, response);
             out.close();
         }
     }

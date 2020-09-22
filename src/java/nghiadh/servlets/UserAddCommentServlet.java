@@ -8,7 +8,6 @@ package nghiadh.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -17,19 +16,19 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nghiadh.posts.PostsDAO;
-import nghiadh.posts.PostsDTO;
-import nghiadh.utils.FileHelpers;
+import javax.servlet.http.HttpSession;
+import nghiadh.NotificationEvent.NotificationEventDAO;
+import nghiadh.comments.CommentsDAO;
+import nghiadh.notifications.NotificationsDAO;
+import nghiadh.users.UsersDTO;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "ArticleSearchingServlet", urlPatterns = {"/ArticleSearchingServlet"})
-public class ArticleSearchingServlet extends HttpServlet {
-    private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
-
+@WebServlet(name = "UserAddCommentServlet", urlPatterns = {"/UserAddCommentServlet"})
+public class UserAddCommentServlet extends HttpServlet {
+    private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -43,40 +42,32 @@ public class ArticleSearchingServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String searchedContent = request.getParameter("txtContent");
-        String hiddenPage = request.getParameter("hiddenPage");
+        String txtPostID = request.getParameter("postID");
         try {
-            if (searchedContent == null||searchedContent.trim().isEmpty()) {
-                searchedContent="";
-            }
-            int page = DEFAULT_PAGE_NUMBER;
-            if (hiddenPage!=null&&!hiddenPage.trim().isEmpty()) {
-                page = Integer.parseInt(hiddenPage);
-            }
-            PostsDAO dao = new PostsDAO();
-            int rs = dao.searchPostByContent(searchedContent, page);
-            int totalPage = dao.getNumberOfPageForPostWithContent(searchedContent);
-            if(rs>0){                
-                List<PostsDTO> resultList = dao.getResultList();
-                request.setAttribute("RESULT_LIST", resultList);
-                request.setAttribute("NUMBER_OF_PAGE", totalPage);
-                String realPath = request.getServletContext().getRealPath("/PostsImg");
-                if(resultList!=null){
-                for(PostsDTO post: resultList){
-                    if(post.getImg()!=null&&!post.getImg().trim().isEmpty()){
-                        FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+            HttpSession session = request.getSession(false);            
+            String commentContent = request.getParameter("txtComment");
+            int postID = Integer.parseInt(txtPostID);
+            if(session!=null){
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                CommentsDAO dao = new CommentsDAO();
+                boolean rs=dao.createCommentOnPost(postID, commentContent, loginUser.getEmail());
+                if(rs){
+                    NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
+                    int eventType = notificationTypeDAO.getEventTypeByName("Comment");
+                    if(eventType>=0){
+                        NotificationsDAO notificationsDAO = new NotificationsDAO();
+                        notificationsDAO.addNotification(loginUser.getEmail(), postID, eventType);
                     }
                 }
-            }
-            }
-        } catch (NumberFormatException ex) {
+            }            
+        }catch(NumberFormatException ex){
             ex.printStackTrace();
-        } catch (SQLException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }catch (SQLException ex) {
+            Logger.getLogger(UserAddCommentServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            request.getRequestDispatcher(ARTICLE_LIST_PAGE).forward(request, response);
+            Logger.getLogger(UserAddCommentServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            response.sendRedirect(LOAD_ARTICLE_CONTROLLER+"?postID="+txtPostID);
             out.close();
         }
     }

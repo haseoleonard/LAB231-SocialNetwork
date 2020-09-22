@@ -6,33 +6,32 @@
 package nghiadh.servlets;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
-import nghiadh.posts.PostsDAO;
+import nghiadh.NotificationEvent.NotificationEventDAO;
+import nghiadh.notifications.NotificationsDAO;
+import nghiadh.reactionType.ReactionTypeDAO;
+import nghiadh.reactions.ReactionsDAO;
 import nghiadh.users.UsersDTO;
-import nghiadh.utils.FileHelpers;
 
 /**
  *
  * @author haseo
  */
-@MultipartConfig
-@WebServlet(name = "ArticleCreateServlet", urlPatterns = {"/ArticleCreateServlet"})
-public class ArticleCreateServlet extends HttpServlet {
-    private static final String CREATE_ARTICLE_PAGE = "createArticlePage.jsp";
+@WebServlet(name = "UserReactToPostServlet", urlPatterns = {"/UserReactToPostServlet"})
+public class UserReactToPostServlet extends HttpServlet {
+
+    private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -46,39 +45,47 @@ public class ArticleCreateServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        try{
-            /* TODO output your page here. You may use following sample code. */
+        String txtPostID = request.getParameter("postID");
+        try {
+            String button = request.getParameter("btAction");
             HttpSession session = request.getSession(false);
-            UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
-            String title = request.getParameter("txtTitle");
-            String description = request.getParameter("txtDescription");
-            String content = request.getParameter("txtContent");
-            String imgUrl = null;
-            Part filePart = request.getPart("uploadImg");
-            if(filePart!=null&&filePart.getSize()>0){
-                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();              
-                fileName = System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."));
-//                String filePath = request.getServletContext().getRealPath("/PostsImg/");
-                InputStream fileContent = filePart.getInputStream();
-//                FileHelpers.writeImgToServerFile(filePath+fileName, fileContent);
-//                imgUrl=request.getContextPath()+"/PostsImg/"+fileName;
-                FileHelpers.writeImgToServerFile("D:\\PostsImg\\"+fileName, fileContent);
-                imgUrl=fileName;
-//                System.out.println(imgUrl);
+            int postID = Integer.parseInt(txtPostID);
+            if (session != null) {
+                UsersDTO loginUsers = (UsersDTO) session.getAttribute("LOGIN_USER");
+                if (button != null) {
+                    boolean addNotification=false;
+                    ReactionTypeDAO reactionTypeDAO = new ReactionTypeDAO();
+                    ReactionsDAO reactionsDAO = new ReactionsDAO();
+                    int reactionType = reactionTypeDAO.getReactionTypeByName(button);
+                    int lastReaction = reactionsDAO.checkUserReaction(postID,loginUsers.getEmail());
+                    if (reactionType >= 0) {
+                        if(lastReaction==-1){
+                            reactionsDAO.addReactionToPost(postID, loginUsers.getEmail(), reactionType);
+                            addNotification=true;
+                        }else if(lastReaction==reactionType){
+                            reactionsDAO.removeReaction(postID, loginUsers.getEmail());
+                        }else{
+                            reactionsDAO.updateReaction(postID, loginUsers.getEmail(), reactionType);
+                            addNotification=true;
+                        }
+                        if(addNotification){
+                            NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
+                            NotificationsDAO notificationsDAO = new NotificationsDAO();
+                            int eventType = notificationTypeDAO.getEventTypeByName(button);
+                            if(eventType>=0){
+                                notificationsDAO.addNotification(loginUsers.getEmail(), postID, eventType);
+                            }
+                        }
+                    }
+                }
             }
-            PostsDAO dao = new PostsDAO();
-            boolean rs = dao.createNewPost(title, description, content, imgUrl, loginUser.getEmail());
-            if(rs){
-                request.setAttribute("SUCCESS", "SUCCESS");
-            }else{
-                request.setAttribute("FAILED", "FAILED");
-            }
+        }catch(NumberFormatException ex){
+        }catch (NamingException ex) {
+            Logger.getLogger(UserReactToPostServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
-            Logger.getLogger(ArticleCreateServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(ArticleCreateServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            request.getRequestDispatcher(CREATE_ARTICLE_PAGE).forward(request, response);
+            Logger.getLogger(UserReactToPostServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            response.sendRedirect(LOAD_ARTICLE_CONTROLLER + "?postID=" + txtPostID);
             out.close();
         }
     }

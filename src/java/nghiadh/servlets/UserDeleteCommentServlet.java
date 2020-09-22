@@ -8,7 +8,6 @@ package nghiadh.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.NamingException;
@@ -17,19 +16,15 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import nghiadh.posts.PostsDAO;
-import nghiadh.posts.PostsDTO;
-import nghiadh.utils.FileHelpers;
+import nghiadh.comments.CommentsDAO;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "ArticleSearchingServlet", urlPatterns = {"/ArticleSearchingServlet"})
-public class ArticleSearchingServlet extends HttpServlet {
-    private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
-
+@WebServlet(name = "UserDeleteCommentServlet", urlPatterns = {"/UserDeleteCommentServlet"})
+public class UserDeleteCommentServlet extends HttpServlet {
+    private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -43,40 +38,20 @@ public class ArticleSearchingServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String searchedContent = request.getParameter("txtContent");
-        String hiddenPage = request.getParameter("hiddenPage");
-        try {
-            if (searchedContent == null||searchedContent.trim().isEmpty()) {
-                searchedContent="";
+        String postID = request.getParameter("postID");
+        try{
+            String txtCommentID = request.getParameter("commentID");
+            if(txtCommentID!=null&&!txtCommentID.trim().isEmpty()){
+                int commentID=Integer.parseInt(txtCommentID);
+                CommentsDAO dao = new CommentsDAO();
+                dao.deleteComment(commentID);
             }
-            int page = DEFAULT_PAGE_NUMBER;
-            if (hiddenPage!=null&&!hiddenPage.trim().isEmpty()) {
-                page = Integer.parseInt(hiddenPage);
-            }
-            PostsDAO dao = new PostsDAO();
-            int rs = dao.searchPostByContent(searchedContent, page);
-            int totalPage = dao.getNumberOfPageForPostWithContent(searchedContent);
-            if(rs>0){                
-                List<PostsDTO> resultList = dao.getResultList();
-                request.setAttribute("RESULT_LIST", resultList);
-                request.setAttribute("NUMBER_OF_PAGE", totalPage);
-                String realPath = request.getServletContext().getRealPath("/PostsImg");
-                if(resultList!=null){
-                for(PostsDTO post: resultList){
-                    if(post.getImg()!=null&&!post.getImg().trim().isEmpty()){
-                        FileHelpers.copyImgToContextFolder(realPath, post.getImg());
-                    }
-                }
-            }
-            }
-        } catch (NumberFormatException ex) {
-            ex.printStackTrace();
         } catch (SQLException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserDeleteCommentServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            request.getRequestDispatcher(ARTICLE_LIST_PAGE).forward(request, response);
+            Logger.getLogger(UserDeleteCommentServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            response.sendRedirect(LOAD_ARTICLE_CONTROLLER+"?postID="+postID);
             out.close();
         }
     }
