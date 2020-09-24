@@ -36,6 +36,7 @@ public final class FileHelpers {
     }
     public static void copyImgToContextFolder(final String realPath,final String fileName) throws FileNotFoundException, IOException{
         File inputFile = new File("D:\\PostsImg\\"+fileName);
+//        File inputFile = new File("/mnt/extern-drive-1/PostsImg/"+fileName);
         File outputFile = new File(realPath+"\\"+fileName);
         FileInputStream fis = null;
         FileOutputStream fos = null;

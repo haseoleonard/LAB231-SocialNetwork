@@ -53,27 +53,34 @@ public class UserReactToPostServlet extends HttpServlet {
             if (session != null) {
                 UsersDTO loginUsers = (UsersDTO) session.getAttribute("LOGIN_USER");
                 if (button != null) {
-                    boolean addNotification=false;
                     ReactionTypeDAO reactionTypeDAO = new ReactionTypeDAO();
                     ReactionsDAO reactionsDAO = new ReactionsDAO();
                     int reactionType = reactionTypeDAO.getReactionTypeByName(button);
                     int lastReaction = reactionsDAO.checkUserReaction(postID,loginUsers.getEmail());
-                    if (reactionType >= 0) {
+                    String lastReactionName = reactionsDAO.getLastReactionName();
+                    if (reactionType >= 0) {    
+                        //
+                        NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
+                        NotificationsDAO notificationsDAO = new NotificationsDAO();
+                        int eventType = -1;
+                        //
                         if(lastReaction==-1){
-                            reactionsDAO.addReactionToPost(postID, loginUsers.getEmail(), reactionType);
-                            addNotification=true;
-                        }else if(lastReaction==reactionType){
-                            reactionsDAO.removeReaction(postID, loginUsers.getEmail());
-                        }else{
-                            reactionsDAO.updateReaction(postID, loginUsers.getEmail(), reactionType);
-                            addNotification=true;
-                        }
-                        if(addNotification){
-                            NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
-                            NotificationsDAO notificationsDAO = new NotificationsDAO();
-                            int eventType = notificationTypeDAO.getEventTypeByName(button);
-                            if(eventType>=0){
+                            eventType=notificationTypeDAO.getEventTypeByName(button);
+                            if(reactionsDAO.addReactionToPost(postID, loginUsers.getEmail(), reactionType)&&eventType>=0){
                                 notificationsDAO.addNotification(loginUsers.getEmail(), postID, eventType);
+                            }
+                        }else if(lastReaction==reactionType){
+                            eventType=notificationTypeDAO.getEventTypeByName(lastReactionName);
+                            if(reactionsDAO.removeReaction(postID, loginUsers.getEmail())){
+                                notificationsDAO.removeNotification(loginUsers.getEmail(), postID, eventType);
+                            }
+                        }else{
+                            if(reactionsDAO.updateReaction(postID, loginUsers.getEmail(), reactionType)){
+                                eventType=notificationTypeDAO.getEventTypeByName(lastReactionName);
+                                if(notificationsDAO.removeNotification(loginUsers.getEmail(), postID, eventType)){
+                                    eventType=notificationTypeDAO.getEventTypeByName(button);
+                                    notificationsDAO.addNotification(loginUsers.getEmail(), postID, eventType);
+                                }
                             }
                         }
                     }

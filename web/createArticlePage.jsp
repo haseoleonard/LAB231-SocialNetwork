@@ -34,7 +34,6 @@
                 <font style="color: red">${requestScope.ERROR.contentLengthErr}</font><br/>
             </c:if>
             <textarea name="txtContent" rows="8" cols="100" style="resize: none"><c:if test="${not empty param.txtContent}">${param.txtContent}</c:if></textarea><br/>
-            <!--<input type="textarea" name="txtContent" value="${param.txtContent}"/>-->
                 
             Image(Optional) <input type="file" name="uploadImg" accept="image/jpeg,image/png"/><br/>
             <c:if test="${not empty requestScope.ERROR.fileTypeIncorrectErr}">

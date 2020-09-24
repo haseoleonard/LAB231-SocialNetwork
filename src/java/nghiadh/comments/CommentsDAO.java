@@ -36,6 +36,29 @@ public class CommentsDAO implements Serializable{
         if(this.con!=null)this.con.close();
     }
     
+    public int getRecentCommentID(int postID,String commentEmail) throws SQLException, NamingException{
+        int commentID = -1;
+        try{
+            con =DBHelpers.makeConnection();
+            if(con!=null){
+                String sql = "select commentID "
+                        + "from Comments "
+                        + "where postID=? and commentEmail like ? "
+                        + "ORDER BY commentTime DESC";
+                psm = con.prepareStatement(sql);
+                psm.setInt(1, postID);
+                psm.setString(2, commentEmail);
+                rs = psm.executeQuery();
+                if(rs.next()){
+                    commentID=rs.getInt("commentID");
+                }
+            }
+        }finally{
+            closeConnection();
+        }
+        return commentID;
+    }
+    
     public boolean createCommentOnPost(int postID,String comment,String commenterEmail) throws SQLException, NamingException{
         try{
             this.con = DBHelpers.makeConnection();

@@ -18,8 +18,8 @@ import nghiadh.utils.DBHelpers;
  * @author haseo
  */
 public class ReactionsDAO implements Serializable{
-    private static final int REACTION_TYPE_LIKE=0;
-    private static final int REACTION_TYPE_DISLIKE=1;
+//    private static final int REACTION_TYPE_LIKE=0;
+//    private static final int REACTION_TYPE_DISLIKE=1;
     
     private Connection con;
     private PreparedStatement psm = null;
@@ -58,19 +58,28 @@ public class ReactionsDAO implements Serializable{
         }
         return totalLike;
     }
+    private String lastReactionName;
+
+    public String getLastReactionName() {
+        return lastReactionName;
+    }
     
     public int checkUserReaction(int postID, String reactEmail) throws SQLException, NamingException{
         int reactionType = -1;
         try{
             con = DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "select reactionType from Reactions where postID=? and reactEmail like ?";
+                String sql = "select Reactions.reactionType,reactionName "
+                        + "from Reactions,ReactionType "
+                        + "where postID=? and reactEmail like ? "
+                        + "and Reactions.reactionType=ReactionType.reactionType";
                 psm = con.prepareStatement(sql);
                 psm.setInt(1, postID);
                 psm.setString(2, reactEmail);
                 rs = psm.executeQuery();
                 if(rs.next()){
                     reactionType=rs.getInt("reactionType");
+                    lastReactionName = rs.getString("reactionName");
                 }
             }
         }finally{

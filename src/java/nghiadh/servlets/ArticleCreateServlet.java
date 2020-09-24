@@ -63,6 +63,7 @@ public class ArticleCreateServlet extends HttpServlet {
 //                FileHelpers.writeImgToServerFile(filePath+fileName, fileContent);
 //                imgUrl=request.getContextPath()+"/PostsImg/"+fileName;
                 FileHelpers.writeImgToServerFile("D:\\PostsImg\\"+fileName, fileContent);
+//                FileHelpers.writeImgToServerFile("/mnt/extern-drive-1/PostsImg/"+fileName, fileContent);
                 imgUrl=fileName;
 //                System.out.println(imgUrl);
             }

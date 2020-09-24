@@ -27,7 +27,6 @@
                     <a href="DispatchController?btAction=loadArticle&postID=${post.postID}">${post.title}</a>
                     <p>${post.description}</p>
                     <c:if test="${not empty post.img}">
-                        <!--<img src="file:${post.img}"/>-->
                         <img src="PostsImg/${post.img}"/>                       
                     </c:if>
                 </div>

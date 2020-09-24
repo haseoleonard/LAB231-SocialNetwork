@@ -5,15 +5,6 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-<!--    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>-->
-    <body>
-        <header>
-            <a href=""><h1>Some kind of Social Network</h1></a>
-        </header>
-    </body>
-</html>
+    <header style="background: #3b5998; position: fixed; top: 0; left: 0; width: 100%; padding-left: 40px">
+        <a style="text-decoration: none; color: white" href="DispatchController"><h1>Some kind of Social Network</h1></a>
+    </header>

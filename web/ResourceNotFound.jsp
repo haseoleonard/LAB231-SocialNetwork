@@ -15,7 +15,7 @@
         <jsp:include page="WEB-INF/jspf/Banner.jsp"/>
         <div>
             <h3 style="color: red">The Resources you requested cannot be found!!!</h3>
-            <a href="">Click here to return to Home Page</a>
+            <a href="DispatchController">Click here to return to Home Page</a>
         </div>
     </body>
 </html>

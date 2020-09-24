@@ -55,12 +55,69 @@ public class NotificationsDAO implements Serializable{
         return false;
     }
     
+    public boolean addNotification(String triggeredEmail,int triggeredPostID,int commentID, int eventType) throws SQLException, NamingException{
+        try{
+            con = DBHelpers.makeConnection();
+            if(con!=null){
+                String sql = "insert into Notifications(triggerEmail,triggeredPostID,triggeredCommentID,eventType) "
+                        + "values (?,?,?,?)";
+                psm = con.prepareStatement(sql);
+                psm.setString(1, triggeredEmail);
+                psm.setInt(2, triggeredPostID);
+                psm.setInt(3, commentID);
+                psm.setInt(4, eventType);
+                int result=psm.executeUpdate();
+                if(result>0)return true;
+            }
+        }finally{
+            closeConnection();
+        }
+        return false;
+    }
+    
+    public boolean removeNotification(String triggeredEmail,int triggeredPostID,int eventType) throws SQLException, NamingException{
+        try{
+            con = DBHelpers.makeConnection();
+            if(con!=null){
+                String sql = "delete from Notifications "
+                        + "where triggeredPostID=? and eventType=? "
+                        + "and triggerEmail like ?";
+                psm = con.prepareStatement(sql);
+                psm.setInt(1, triggeredPostID);
+                psm.setInt(2, eventType);
+                psm.setString(3, triggeredEmail);
+                int result = psm.executeUpdate();
+                if(result>0)return true;
+            }
+        }finally{
+            closeConnection();
+        }
+        return false;
+    }
+    
+    public boolean removeNotification(int commentID) throws SQLException, NamingException{
+        try{
+            con = DBHelpers.makeConnection();
+            if(con!=null){
+                String sql = "delete from Notifications "
+                        + "where triggeredCommentID=?";
+                psm = con.prepareStatement(sql);
+                psm.setInt(1, commentID);
+                int result = psm.executeUpdate();
+                if(result>0)return true;
+            }
+        }finally{
+            closeConnection();
+        }
+        return false;
+    }
+    
     public int getNumberOfNotificationPage(String postIDString) throws SQLException, NamingException{
         int totalPost = 0;
         try{
             con=DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "select count(triggerEmail) as totalNoti "
+                String sql = "select count(notifyReceivedTime) as totalNoti "
                         + "from Notifications "
                         + "where triggeredPostID IN ("+postIDString+")";
                 psm = con.prepareStatement(sql);

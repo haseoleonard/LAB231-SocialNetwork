@@ -13,6 +13,8 @@
         <title>Create New Account</title>
     </head>
     <body>
+        <%--<jsp:include page="WEB-INF/jspf/Banner.jsp"/>--%>
+        <%@include file="WEB-INF/jspf/Banner.jspf" %>
         <h1>Create New Account</h1>
         <form action="GuestDispatchController" method="POST">
             Email* <input type="text" name="txtEmail" value="${param.txtEmail}"/><br/>

@@ -16,7 +16,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nghiadh.NotificationEvent.NotificationEventDAO;
 import nghiadh.comments.CommentsDAO;
+import nghiadh.notifications.NotificationsDAO;
 
 /**
  *
@@ -44,7 +46,15 @@ public class UserDeleteCommentServlet extends HttpServlet {
             if(txtCommentID!=null&&!txtCommentID.trim().isEmpty()){
                 int commentID=Integer.parseInt(txtCommentID);
                 CommentsDAO dao = new CommentsDAO();
-                dao.deleteComment(commentID);
+                boolean rs = dao.deleteComment(commentID);
+                if(rs){
+                    NotificationEventDAO notificationEventDAO = new NotificationEventDAO();
+                    int eventType = notificationEventDAO.getEventTypeByName("Comment");
+                    if(eventType>=0){
+                        NotificationsDAO notificationsDAO = new NotificationsDAO();
+                        notificationsDAO.removeNotification(commentID);
+                    }
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(UserDeleteCommentServlet.class.getName()).log(Level.SEVERE, null, ex);

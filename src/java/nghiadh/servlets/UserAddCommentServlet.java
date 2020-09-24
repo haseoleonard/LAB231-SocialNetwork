@@ -52,11 +52,14 @@ public class UserAddCommentServlet extends HttpServlet {
                 CommentsDAO dao = new CommentsDAO();
                 boolean rs=dao.createCommentOnPost(postID, commentContent, loginUser.getEmail());
                 if(rs){
-                    NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
-                    int eventType = notificationTypeDAO.getEventTypeByName("Comment");
-                    if(eventType>=0){
-                        NotificationsDAO notificationsDAO = new NotificationsDAO();
-                        notificationsDAO.addNotification(loginUser.getEmail(), postID, eventType);
+                    int commentID = dao.getRecentCommentID(postID, loginUser.getEmail());
+                    if(commentID>=0){
+                        NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
+                        int eventType = notificationTypeDAO.getEventTypeByName("Comment");
+                        if(eventType>=0){
+                            NotificationsDAO notificationsDAO = new NotificationsDAO();
+                            notificationsDAO.addNotification(loginUser.getEmail(), postID, commentID, eventType);
+                        }
                     }
                 }
             }            
