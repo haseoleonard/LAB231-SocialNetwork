@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -24,6 +22,7 @@ import javax.servlet.http.Part;
 import nghiadh.posts.PostsDAO;
 import nghiadh.users.UsersDTO;
 import nghiadh.utils.FileHelpers;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -32,7 +31,9 @@ import nghiadh.utils.FileHelpers;
 @MultipartConfig
 @WebServlet(name = "ArticleCreateServlet", urlPatterns = {"/ArticleCreateServlet"})
 public class ArticleCreateServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(ArticleCreateServlet.class);
     private static final String CREATE_ARTICLE_PAGE = "createArticlePage.jsp";
+    private static final String LOAD_ARTICLE_CONTROLLER = "DispatchController?btAction=loadArticle&postID=";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -46,6 +47,7 @@ public class ArticleCreateServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+        int postID=-1;
         try{
             /* TODO output your page here. You may use following sample code. */
             HttpSession session = request.getSession(false);
@@ -53,33 +55,28 @@ public class ArticleCreateServlet extends HttpServlet {
             String title = request.getParameter("txtTitle");
             String description = request.getParameter("txtDescription");
             String content = request.getParameter("txtContent");
+            content=content.replaceAll("\n", "<br/>");
             String imgUrl = null;
             Part filePart = request.getPart("uploadImg");
             if(filePart!=null&&filePart.getSize()>0){
                 String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();              
                 fileName = System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."));
-//                String filePath = request.getServletContext().getRealPath("/PostsImg/");
                 InputStream fileContent = filePart.getInputStream();
-//                FileHelpers.writeImgToServerFile(filePath+fileName, fileContent);
-//                imgUrl=request.getContextPath()+"/PostsImg/"+fileName;
-                FileHelpers.writeImgToServerFile("D:\\PostsImg\\"+fileName, fileContent);
-//                FileHelpers.writeImgToServerFile("/mnt/extern-drive-1/PostsImg/"+fileName, fileContent);
+                FileHelpers.writeImgToServerFile(fileName, fileContent);
                 imgUrl=fileName;
-//                System.out.println(imgUrl);
             }
             PostsDAO dao = new PostsDAO();
             boolean rs = dao.createNewPost(title, description, content, imgUrl, loginUser.getEmail());
             if(rs){
+                postID=dao.getLastestPostIDByEmail(loginUser.getEmail());
                 request.setAttribute("SUCCESS", "SUCCESS");
-            }else{
-                request.setAttribute("FAILED", "FAILED");
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ArticleCreateServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleCreateServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(ex.getMessage());
         }finally{
-            request.getRequestDispatcher(CREATE_ARTICLE_PAGE).forward(request, response);
+            response.sendRedirect(LOAD_ARTICLE_CONTROLLER+postID);
             out.close();
         }
     }

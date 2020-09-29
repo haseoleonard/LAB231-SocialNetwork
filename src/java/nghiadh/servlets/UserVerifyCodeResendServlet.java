@@ -7,21 +7,31 @@ package nghiadh.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import javax.mail.MessagingException;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import nghiadh.userauthentication.UserAuthenticationDAO;
+import nghiadh.users.UsersDTO;
+import nghiadh.utils.EncodeHelper;
+import nghiadh.utils.MailHelpers;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/LogoutServlet"})
-public class LogoutServlet extends HttpServlet {
-    private static final String LOGIN_PAGE = "login.jsp";
+@WebServlet(name = "UserVerifyCodeResendServlet", urlPatterns = {"/UserVerifyCodeResendServlet"})
+public class UserVerifyCodeResendServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(UserVerifyCodeResendServlet.class); 
+    private static final String VERIFY_PAGE = "AccountVerifyPage.jsp";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -35,22 +45,33 @@ public class LogoutServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        try{
+        try {
             HttpSession session = request.getSession(false);
-            if(session!=null){
-                Cookie[] cookies = request.getCookies();
-                for(Cookie cookie: cookies){
-                    if(cookie.getName().equals("username")
-                            ||cookie.getName().equals("password")){
-                        cookie.setMaxAge(0);
-                        cookie.setValue("nope");
-                        response.addCookie(cookie);
+            if (session != null) {
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                UserAuthenticationDAO userAuthenticationDAO = new UserAuthenticationDAO();
+                Timestamp expTime = userAuthenticationDAO.getAuthCodeTimeOutDate(loginUser.getEmail());
+                String authCode = null;
+                if (expTime == null) {
+                    if (userAuthenticationDAO.deleteTimeOutAuthCode()) {
+                        authCode = EncodeHelper.generateNewVerificationCode();
+                        userAuthenticationDAO.addTimeOutAuthCode(loginUser.getEmail(), authCode);
+                        expTime = userAuthenticationDAO.getAuthCodeTimeOutDate(loginUser.getEmail());
                     }
                 }
-                session.invalidate();
+                authCode = userAuthenticationDAO.getAuthCode();
+                MailHelpers.sendVerificationEmail(loginUser.getEmail(), authCode, expTime);
             }
-        }finally{
-            response.sendRedirect(LOGIN_PAGE);
+        } catch (SQLException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (NamingException ex) {
+            LOGGER.fatal(ex.getMessage());
+        } catch (MessagingException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (UnsupportedEncodingException ex) {
+            LOGGER.fatal(ex.getMessage());
+        } finally {
+            response.sendRedirect(VERIFY_PAGE);
             out.close();
         }
     }

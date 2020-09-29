@@ -15,13 +15,17 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import nghiadh.users.UsersDTO;
 
 /**
  *
  * @author haseo
  */
-public class ArticleLoadFilter implements Filter {
-    
+public class AccountStatusAuthFilter implements Filter {
+    private static final String LOGOUT_CONTROLLER = "DispatchController?btAction=Logout";
     private static final boolean debug = true;
 
     // The filter configuration object we are associated with.  If
@@ -29,13 +33,13 @@ public class ArticleLoadFilter implements Filter {
     // configured. 
     private FilterConfig filterConfig = null;
     
-    public ArticleLoadFilter() {
+    public AccountStatusAuthFilter() {
     }    
     
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
 //        if (debug) {
-//            log("ArticleLoadFilter:DoBeforeProcessing");
+//            log("AccountStatusAuthFilter:DoBeforeProcessing");
 //        }
 
         // Write code here to process the request and/or response before
@@ -63,7 +67,7 @@ public class ArticleLoadFilter implements Filter {
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
 //        if (debug) {
-//            log("ArticleLoadFilter:DoAfterProcessing");
+//            log("AccountStatusAuthFilter:DoAfterProcessing");
 //        }
 
         // Write code here to process the request and/or response after
@@ -99,14 +103,24 @@ public class ArticleLoadFilter implements Filter {
             throws IOException, ServletException {
         
 //        if (debug) {
-//            log("ArticleLoadFilter:doFilter()");
+//            log("AccountStatusAuthFilter:doFilter()");
 //        }
         
         doBeforeProcessing(request, response);
         
         Throwable problem = null;
         try {
-            chain.doFilter(request, response);
+            boolean auth = false;
+            HttpSession session = ((HttpServletRequest)request).getSession(false);
+            if(session!=null){
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                if(loginUser.getStatus()==2)auth=true;
+            }
+            if(auth){
+                chain.doFilter(request, response);
+            }else{
+                ((HttpServletResponse)response).sendRedirect(LOGOUT_CONTROLLER);
+            }
         } catch (Throwable t) {
             // If an exception is thrown somewhere down the filter chain,
             // we still want to execute our after processing, and then
@@ -159,7 +173,7 @@ public class ArticleLoadFilter implements Filter {
         this.filterConfig = filterConfig;
         if (filterConfig != null) {
 //            if (debug) {                
-//                log("ArticleLoadFilter:Initializing filter");
+//                log("AccountStatusAuthFilter:Initializing filter");
 //            }
         }
     }
@@ -170,9 +184,9 @@ public class ArticleLoadFilter implements Filter {
     @Override
     public String toString() {
         if (filterConfig == null) {
-            return ("ArticleLoadFilter()");
+            return ("AccountStatusAuthFilter()");
         }
-        StringBuffer sb = new StringBuffer("ArticleLoadFilter(");
+        StringBuffer sb = new StringBuffer("AccountStatusAuthFilter(");
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());

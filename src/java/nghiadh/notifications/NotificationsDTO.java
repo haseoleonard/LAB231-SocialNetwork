@@ -6,6 +6,8 @@
 package nghiadh.notifications;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 
 /**
  *
@@ -15,14 +17,16 @@ public class NotificationsDTO implements Serializable{
     private String triggerEmail;
     private int triggerPostID;
     private String eventName;
+    private Timestamp time;
 
     public NotificationsDTO() {
     }
 
-    public NotificationsDTO(String triggerEmail, int triggerPostID, String eventName) {
+    public NotificationsDTO(String triggerEmail, int triggerPostID, String eventName, Timestamp time) {
         this.triggerEmail = triggerEmail;
         this.triggerPostID = triggerPostID;
         this.eventName = eventName;
+        this.time=time;
     }
 
     public String getTriggerEmail() {
@@ -47,6 +51,17 @@ public class NotificationsDTO implements Serializable{
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
+    }
+
+//    public Timestamp getTime() {
+//        return time;
+//    }
+    public String getTime() {
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.SHORT).format(time);
+    }    
+
+    public void setTime(Timestamp time) {
+        this.time = time;
     }
     
 }

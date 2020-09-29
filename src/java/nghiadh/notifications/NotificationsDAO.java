@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import javax.naming.NamingException;
@@ -81,7 +82,7 @@ public class NotificationsDAO implements Serializable{
             if(con!=null){
                 String sql = "delete from Notifications "
                         + "where triggeredPostID=? and eventType=? "
-                        + "and triggerEmail like ?";
+                        + "and triggerEmail=?";
                 psm = con.prepareStatement(sql);
                 psm.setInt(1, triggeredPostID);
                 psm.setInt(2, eventType);
@@ -143,7 +144,7 @@ public class NotificationsDAO implements Serializable{
         try{
             con=DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "select triggerEmail,triggeredPostID,eventName "
+                String sql = "select triggerEmail,triggeredPostID,eventName,notifyReceivedTime "
                         + "from Notifications n,NotificationEvent e "
                         + "where e.eventType=n.eventType "
                         + "and triggeredPostID IN ("+postIDString+") "
@@ -159,7 +160,8 @@ public class NotificationsDAO implements Serializable{
                     String triggerEmail = rs.getString("triggerEmail");
                     int postID = rs.getInt("triggeredPostID");
                     String eventName = rs.getString("eventName");
-                    this.notificationsList.add(new NotificationsDTO(triggerEmail, postID, eventName));
+                    Timestamp time = rs.getTimestamp("notifyReceivedTime");
+                    this.notificationsList.add(new NotificationsDTO(triggerEmail, postID, eventName,time));
                     totalNotification++;
                 }
             }

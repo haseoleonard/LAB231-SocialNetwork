@@ -7,19 +7,23 @@ package nghiadh.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.sql.Timestamp;
+import javax.mail.MessagingException;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import nghiadh.userauthentication.UserAuthenticationDAO;
 import nghiadh.users.UsersDAO;
 import nghiadh.users.UsersError;
 import nghiadh.utils.EncodeHelper;
+import nghiadh.utils.MailHelpers;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -27,7 +31,9 @@ import nghiadh.utils.EncodeHelper;
  */
 @WebServlet(name = "CreateAccountServlet", urlPatterns = {"/CreateAccountServlet"})
 public class CreateAccountServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(CreateAccountServlet.class);
     private static final String CREATE_ACCOUNT_PAGE = "createAccountPage.jsp";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -39,7 +45,7 @@ public class CreateAccountServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         String url = CREATE_ACCOUNT_PAGE;
@@ -50,21 +56,30 @@ public class CreateAccountServlet extends HttpServlet {
             UsersDAO dao = new UsersDAO();
             String hashedPassword = EncodeHelper.toHexString(password);
             boolean rs = dao.createNewAccount(email, hashedPassword, name);
-            if(rs){
-               request.setAttribute("CREATE_SUCCESS", rs);
+            if (rs) {
+                UserAuthenticationDAO authenticationDAO = new UserAuthenticationDAO();
+                String authCode = EncodeHelper.generateNewVerificationCode();
+                if(authenticationDAO.addTimeOutAuthCode(email, authCode)){
+                    Timestamp timeOutDate = authenticationDAO.getAuthCodeTimeOutDate(email);
+                    MailHelpers.sendVerificationEmail(email, authCode, timeOutDate);
+                    request.setAttribute("CREATE_SUCCESS", rs);    
+                }                
             }
         } catch (SQLException ex) {
-            if(ex.getMessage().contains("duplicate")){
+            if (ex.getMessage().contains("duplicate")) {
                 UsersError error = new UsersError();
                 error.setEmailExistedErr("Email Existed!!!");
                 request.setAttribute("ERROR", error);
             }
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NamingException ex) {
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(ex.getMessage());
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(CreateAccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+            LOGGER.fatal(ex.getMessage());
+        } catch (MessagingException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (UnsupportedEncodingException ex) {
+            LOGGER.error(ex.getMessage());
+        } finally {
             request.getRequestDispatcher(url).forward(request, response);
             out.close();
         }

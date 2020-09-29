@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,6 +20,7 @@ import nghiadh.notifications.NotificationsDAO;
 import nghiadh.notifications.NotificationsDTO;
 import nghiadh.posts.PostsDAO;
 import nghiadh.users.UsersDTO;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -29,8 +28,11 @@ import nghiadh.users.UsersDTO;
  */
 @WebServlet(name = "NotificationLoadingServlet", urlPatterns = {"/NotificationLoadingServlet"})
 public class NotificationLoadingServlet extends HttpServlet {
-    private static final String NOTIFICATION_PAGE="notificationsPage.jsp";
+
+    private static final Logger LOGGER = Logger.getLogger(NotificationLoadingServlet.class);
+    private static final String NOTIFICATION_PAGE = "notificationsPage.jsp";
     private static final int DEFAULT_PAGE_NUMBER = 1;
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -46,35 +48,43 @@ public class NotificationLoadingServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         try {
             HttpSession session = request.getSession(false);
-            if(session!=null){
-                int page=DEFAULT_PAGE_NUMBER;
+            if (session != null) {
+                NotificationsDAO notificationsDAO = new NotificationsDAO();
+                PostsDAO postsDAO = new PostsDAO();
+                int page = DEFAULT_PAGE_NUMBER;
                 UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
                 String txtPage = request.getParameter("page");
-                if(txtPage!=null&&!txtPage.trim().isEmpty()){
-                    page=Integer.parseInt(txtPage);
-                    if(page<DEFAULT_PAGE_NUMBER)page=DEFAULT_PAGE_NUMBER;
-                }
-                PostsDAO postsDAO = new PostsDAO();
+                request.setAttribute("LOADED", "LOADED");
+                request.setAttribute("NEXT_PAGE", NOTIFICATION_PAGE);
                 String postIDString = postsDAO.getPostIDStringByEmail(loginUser.getEmail());
-                if(postIDString!=null&&!postIDString.trim().isEmpty()){
-                    NotificationsDAO notificationsDAO = new NotificationsDAO();
+                if (postIDString != null && !postIDString.trim().isEmpty()) {
                     int totalPage = notificationsDAO.getNumberOfNotificationPage(postIDString);
-                    if(totalPage>0){
+                    if (totalPage > 0) {
+                        if (txtPage != null && !txtPage.trim().isEmpty()&&txtPage.matches("\\d+")) {
+                            page = Integer.parseInt(txtPage);
+                            if (page < DEFAULT_PAGE_NUMBER) {
+                                page = DEFAULT_PAGE_NUMBER;
+                            }else if(page>totalPage){
+                                page=totalPage;
+                            }
+                        }
+                        request.setAttribute("CURR_PAGE", page);
                         request.setAttribute("TOTAL_NOTIFY_PAGE", totalPage);
                         int rs = notificationsDAO.getNotificationByPostID(postIDString, page);
-                        if(rs>0){
+                        if (rs > 0) {
                             List<NotificationsDTO> notificationList = notificationsDAO.getNotificationsList();
                             request.setAttribute("NOTIFICATION_LIST", notificationList);
                         }
                     }
                 }
             }
-        }catch(NumberFormatException ex){
-        }catch (SQLException ex) {
-            Logger.getLogger(NotificationLoadingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumberFormatException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (SQLException ex) {
+            LOGGER.error(ex.getMessage());
         } catch (NamingException ex) {
-            Logger.getLogger(NotificationLoadingServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+            LOGGER.fatal(ex.getMessage());
+        } finally {
             request.getRequestDispatcher(NOTIFICATION_PAGE).forward(request, response);
             out.close();
         }

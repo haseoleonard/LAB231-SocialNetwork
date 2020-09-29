@@ -8,8 +8,6 @@ package nghiadh.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import nghiadh.NotificationEvent.NotificationEventDAO;
 import nghiadh.comments.CommentsDAO;
 import nghiadh.notifications.NotificationsDAO;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -26,6 +25,7 @@ import nghiadh.notifications.NotificationsDAO;
  */
 @WebServlet(name = "UserDeleteCommentServlet", urlPatterns = {"/UserDeleteCommentServlet"})
 public class UserDeleteCommentServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(UserDeleteCommentServlet.class);
     private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -57,9 +57,9 @@ public class UserDeleteCommentServlet extends HttpServlet {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(UserDeleteCommentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
         } catch (NamingException ex) {
-            Logger.getLogger(UserDeleteCommentServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(ex.getMessage());
         }finally{
             response.sendRedirect(LOAD_ARTICLE_CONTROLLER+"?postID="+postID);
             out.close();

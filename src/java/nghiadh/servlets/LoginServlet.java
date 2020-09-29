@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import nghiadh.users.UsersDAO;
 import nghiadh.utils.EncodeHelper;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -28,6 +27,7 @@ import nghiadh.utils.EncodeHelper;
  */
 @WebServlet(name = "LoginServlet", urlPatterns = {"/LoginServlet"})
 public class LoginServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(LoginServlet.class);
     private static final String LOGIN_PAGE = "login.jsp";
     private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
     /**
@@ -66,12 +66,8 @@ public class LoginServlet extends HttpServlet {
                     request.setAttribute("error", "Invalid Email or Password");
                 }
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NamingException ex) {
-            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException | NamingException | NoSuchAlgorithmException ex) {
+            LOGGER.error(ex.getMessage());
         }finally{
             if(!rs)request.getRequestDispatcher(url).forward(request, response);
             else response.sendRedirect(url);

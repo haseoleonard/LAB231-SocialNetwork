@@ -6,6 +6,8 @@
 package nghiadh.posts;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 
 /**
  *
@@ -18,17 +20,19 @@ public class PostsDTO implements Serializable{
     private String description;
     private String content;
     private String img;
+    private Timestamp submitTime;
 
     public PostsDTO() {
     }
 
-    public PostsDTO(int postID,String ownerEmail, String title, String description, String content, String img) {
+    public PostsDTO(int postID,String ownerEmail, String title, String description, String content, String img,Timestamp submitTime) {
         this.postID = postID;
         this.ownerEmail=ownerEmail;
         this.title = title;
         this.description = description;
         this.content = content;
         this.img = img;
+        this.submitTime=submitTime;
     }
 
     public PostsDTO(int postID,String ownerEmail, String title, String description, String content) {
@@ -86,6 +90,14 @@ public class PostsDTO implements Serializable{
     public void setImg(String img) {
         this.img = img;
     }
-    
+
+    public String getSubmitTime() {
+//        return submitTime;
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(this.submitTime);
+    }
+
+    public void setSubmitTime(Timestamp submitTime) {
+        this.submitTime = submitTime;
+    }
     
 }

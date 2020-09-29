@@ -8,8 +8,6 @@ package nghiadh.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,9 +17,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import nghiadh.NotificationEvent.NotificationEventDAO;
 import nghiadh.notifications.NotificationsDAO;
+import nghiadh.posts.PostsDAO;
+import nghiadh.posts.PostsDTO;
 import nghiadh.reactionType.ReactionTypeDAO;
 import nghiadh.reactions.ReactionsDAO;
 import nghiadh.users.UsersDTO;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -30,6 +31,7 @@ import nghiadh.users.UsersDTO;
 @WebServlet(name = "UserReactToPostServlet", urlPatterns = {"/UserReactToPostServlet"})
 public class UserReactToPostServlet extends HttpServlet {
 
+    private static final Logger LOGGER = Logger.getLogger(UserReactToPostServlet.class);
     private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
 
     /**
@@ -51,46 +53,61 @@ public class UserReactToPostServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             int postID = Integer.parseInt(txtPostID);
             if (session != null) {
-                UsersDTO loginUsers = (UsersDTO) session.getAttribute("LOGIN_USER");
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
                 if (button != null) {
+                    PostsDAO postsDAO = new PostsDAO();
+                    PostsDTO post = null;
+                    //
+                    if (postsDAO.getRequestedPost(postID)) {
+                        post = postsDAO.getRequestPost();
+                    }
+                    //
                     ReactionTypeDAO reactionTypeDAO = new ReactionTypeDAO();
                     ReactionsDAO reactionsDAO = new ReactionsDAO();
+                    //                    
                     int reactionType = reactionTypeDAO.getReactionTypeByName(button);
-                    int lastReaction = reactionsDAO.checkUserReaction(postID,loginUsers.getEmail());
+                    int lastReaction = reactionsDAO.checkUserReaction(postID, loginUser.getEmail());
                     String lastReactionName = reactionsDAO.getLastReactionName();
-                    if (reactionType >= 0) {    
+                    if (reactionType >= 0) {
                         //
                         NotificationEventDAO notificationTypeDAO = new NotificationEventDAO();
                         NotificationsDAO notificationsDAO = new NotificationsDAO();
-                        int eventType = -1;
+                        int eventType;
                         //
-                        if(lastReaction==-1){
-                            eventType=notificationTypeDAO.getEventTypeByName(button);
-                            if(reactionsDAO.addReactionToPost(postID, loginUsers.getEmail(), reactionType)&&eventType>=0){
-                                notificationsDAO.addNotification(loginUsers.getEmail(), postID, eventType);
+                        if (lastReaction == -1) {
+                            eventType = notificationTypeDAO.getEventTypeByName(button);
+                            if (reactionsDAO.addReactionToPost(postID, loginUser.getEmail(), reactionType) && eventType >= 0) {
+                                if (post != null && !post.getOwnerEmail().equals(loginUser.getEmail())) {
+                                    notificationsDAO.addNotification(loginUser.getEmail(), postID, eventType);
+                                }
                             }
-                        }else if(lastReaction==reactionType){
-                            eventType=notificationTypeDAO.getEventTypeByName(lastReactionName);
-                            if(reactionsDAO.removeReaction(postID, loginUsers.getEmail())){
-                                notificationsDAO.removeNotification(loginUsers.getEmail(), postID, eventType);
+                        } else if (lastReaction == reactionType) {
+                            eventType = notificationTypeDAO.getEventTypeByName(lastReactionName);
+                            if (reactionsDAO.removeReaction(postID, loginUser.getEmail())) {
+                                if (post != null && !post.getOwnerEmail().equals(loginUser.getEmail())) {
+                                    notificationsDAO.removeNotification(loginUser.getEmail(), postID, eventType);
+                                }
                             }
-                        }else{
-                            if(reactionsDAO.updateReaction(postID, loginUsers.getEmail(), reactionType)){
-                                eventType=notificationTypeDAO.getEventTypeByName(lastReactionName);
-                                if(notificationsDAO.removeNotification(loginUsers.getEmail(), postID, eventType)){
-                                    eventType=notificationTypeDAO.getEventTypeByName(button);
-                                    notificationsDAO.addNotification(loginUsers.getEmail(), postID, eventType);
+                        } else {
+                            if (reactionsDAO.updateReaction(postID, loginUser.getEmail(), reactionType)) {
+                                if (post != null && !post.getOwnerEmail().equals(loginUser.getEmail())) {
+                                    eventType = notificationTypeDAO.getEventTypeByName(lastReactionName);
+                                    if (notificationsDAO.removeNotification(loginUser.getEmail(), postID, eventType)) {
+                                        eventType = notificationTypeDAO.getEventTypeByName(button);
+                                        notificationsDAO.addNotification(loginUser.getEmail(), postID, eventType);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }catch(NumberFormatException ex){
-        }catch (NamingException ex) {
-            Logger.getLogger(UserReactToPostServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NumberFormatException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (NamingException ex) {
+            LOGGER.fatal(ex.getMessage());
         } catch (SQLException ex) {
-            Logger.getLogger(UserReactToPostServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
         } finally {
             response.sendRedirect(LOAD_ARTICLE_CONTROLLER + "?postID=" + txtPostID);
             out.close();

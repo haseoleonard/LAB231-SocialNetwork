@@ -8,8 +8,6 @@ package nghiadh.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import nghiadh.posts.PostsDAO;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -24,6 +23,7 @@ import nghiadh.posts.PostsDAO;
  */
 @WebServlet(name = "ArticleDeleteServlet", urlPatterns = {"/ArticleDeleteServlet"})
 public class ArticleDeleteServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(ArticleDeleteServlet.class);
     private static final String LOAD_ARTICLE_CONTROLLER = "ArtcileLoadServlet";
     private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
     /**
@@ -54,9 +54,9 @@ public class ArticleDeleteServlet extends HttpServlet {
                 url=ARTICLE_LIST_PAGE;
             }
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleDeleteServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(ex.getMessage());
         } catch (SQLException ex) {
-            Logger.getLogger(ArticleDeleteServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error(ex.getMessage());
         }finally{
             request.getRequestDispatcher(url).forward(request, response);
             out.close();

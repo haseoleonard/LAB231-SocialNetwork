@@ -1,0 +1,56 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Sep 24, 2020, 11:56:00 PM
+    Author     : haseo
+*/
+/**/
+*{
+    margin: 0;
+    padding: 0;
+}
+input{
+    border-radius: 5px;
+    border: 1px solid black;
+}
+body{
+    height: 100vh;
+    position: relative;
+}
+
+body .login-form{
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+table {
+    margin: 0 auto;
+}
+
+#login, #create{
+    border: none;
+    border-radius: 6px;
+    color: white;
+
+    transition: 200ms cubic-bezier(.08,.52,.52,1) background-color, 200ms cubic-bezier(.08,.52,.52,1) box-shadow, 200ms cubic-bezier(.08,.52,.52,1) transform;
+}
+#login:hover{
+    background-color: #166fe5;
+}
+#login{
+    background-color: #1877f2;
+    width: 100px;
+}
+#create{
+    background-color: #42b72a;
+    width: 130px;
+}
+#create:hover{
+    background-color: #36a420;
+}
+

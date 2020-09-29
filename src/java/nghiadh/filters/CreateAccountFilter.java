@@ -23,7 +23,8 @@ import nghiadh.users.UsersError;
  * @author haseo
  */
 public class CreateAccountFilter implements Filter {
-    private static final String LOGIN_PAGE="login.jsp";
+
+    private static final String LOGIN_PAGE = "login.jsp";
     private static final String CREATE_ACCOUNT_PAGE = "createAccountPage.jsp";
     private static final boolean debug = true;
 
@@ -118,11 +119,10 @@ public class CreateAccountFilter implements Filter {
                 if (email.trim().length() < 6 || email.trim().length() > 120) {
                     foundErr = true;
                     error.setEmailLengthErr("Email Length Must be between 6-120 Characters");
-                } 
-//                else if (!email.trim().matches("")) {
-//                    foundErr = true;
-//                    error.setEmailNotValidErr("Not A valid email!!");
-//                }
+                } else if (!email.trim().matches("[\\w._-]+@([\\w_-]+\\.)+\\w+")) {
+                    foundErr = true;
+                    error.setEmailNotValidErr("Not A valid email!!");
+                }
                 if (password.trim().length() < 6 || password.trim().length() > 32) {
                     foundErr = true;
                     error.setPasswordLengthErr("Password Length must be between 6-32 Characters");
@@ -141,7 +141,7 @@ public class CreateAccountFilter implements Filter {
                     request.setAttribute("ERROR", error);
                     request.getRequestDispatcher(CREATE_ACCOUNT_PAGE).forward(request, response);
                 }
-            }else{
+            } else {
                 HttpServletResponse response1 = (HttpServletResponse) response;
                 response1.sendRedirect(LOGIN_PAGE);
             }

@@ -166,13 +166,14 @@ public class LoginAuthFilter implements Filter {
             boolean allow = false;
             HttpSession session = ((HttpServletRequest)request).getSession(false);
             if(session==null||session.getAttribute("LOGIN_USER")==null){
-                if(guestAllowedList.contains(resource)){
+                if(guestAllowedList.contains(resource)||resource.endsWith(".css")||resource.endsWith(".js")){
                     allow = true;
                 }
             }else if(session.getAttribute("LOGIN_USER")!=null){
                 allow=true;
             }
             if(allow){
+                request.setAttribute("NEXT_PAGE", resource);
                 chain.doFilter(request, response);
             }else{
                 request.getRequestDispatcher(LOGIN_PAGE).forward(request, response);

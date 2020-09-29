@@ -5,25 +5,27 @@
  */
 package nghiadh.servlets;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import nghiadh.comments.CommentsDAO;
 import nghiadh.comments.CommentsDTO;
 import nghiadh.posts.PostsDAO;
 import nghiadh.posts.PostsDTO;
 import nghiadh.reactionType.ReactionTypeDAO;
 import nghiadh.reactions.ReactionsDAO;
+import nghiadh.users.UsersDTO;
 import nghiadh.utils.FileHelpers;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -33,6 +35,7 @@ import nghiadh.utils.FileHelpers;
 public class ArticleLoadServlet extends HttpServlet {
 
     private static final String ARTICLE_PAGE = "ArticlePage.jsp";
+    private static final Logger LOGGER = Logger.getLogger(ArticleLoadServlet.class);
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -48,6 +51,8 @@ public class ArticleLoadServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
+            HttpSession session = request.getSession(false);
+            UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
             /* TODO output your page here. You may use following sample code. */
             String postID = request.getParameter("postID");
             int iPostID = 0;
@@ -58,15 +63,14 @@ public class ArticleLoadServlet extends HttpServlet {
             CommentsDAO commentDAO = new CommentsDAO();
             ReactionsDAO reactionsDAO = new ReactionsDAO();
             ReactionTypeDAO reactionsTypeDAO = new ReactionTypeDAO();
-
+            
             boolean rs = postsDAO.getRequestedPost(iPostID);
             if (rs) {
                 PostsDTO post = postsDAO.getRequestPost();
-                if (post.getImg() != null && !post.getImg().trim().isEmpty()) {
-                    String realPath = request.getServletContext().getRealPath("/PostsImg");
-                    FileHelpers.copyImgToContextFolder(realPath, post.getImg());
-                }
                 request.setAttribute("LOADED_ARTICLE", post);
+                int lastReaction = reactionsDAO.checkUserReaction(iPostID, loginUser.getEmail());
+                String lastReactionName = reactionsDAO.getLastReactionName();
+                request.setAttribute("LAST_REACTION", lastReactionName);
                 //
                 int reactionType = reactionsTypeDAO.getReactionTypeByName("Like");
                 int numberOfLike = reactionsDAO.getNumberOfReaction(iPostID, reactionType);
@@ -82,12 +86,17 @@ public class ArticleLoadServlet extends HttpServlet {
                     List<CommentsDTO> commentList = commentDAO.getCommentList();
                     request.setAttribute("LOADED_COMMENT", commentList);
                 }
+                //
+                if (post.getImg() != null && !post.getImg().trim().isEmpty()) {
+                    String realPath = request.getServletContext().getRealPath("/PostsImg");
+                    FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+                }
+                //
             }
-        } catch (NumberFormatException ex) {
-        } catch (SQLException ex) {
-            Logger.getLogger(ArticleLoadServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException | NumberFormatException | SQLException ex) {
+            LOGGER.error(ex.getMessage());
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleLoadServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(ex.getMessage());
         } finally {
             request.getRequestDispatcher(ARTICLE_PAGE).forward(request, response);
             out.close();

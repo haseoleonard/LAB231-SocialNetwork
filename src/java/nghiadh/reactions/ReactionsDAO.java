@@ -71,7 +71,7 @@ public class ReactionsDAO implements Serializable{
             if(con!=null){
                 String sql = "select Reactions.reactionType,reactionName "
                         + "from Reactions,ReactionType "
-                        + "where postID=? and reactEmail like ? "
+                        + "where postID=? and reactEmail=? "
                         + "and Reactions.reactionType=ReactionType.reactionType";
                 psm = con.prepareStatement(sql);
                 psm.setInt(1, postID);
@@ -111,7 +111,7 @@ public class ReactionsDAO implements Serializable{
             con = DBHelpers.makeConnection();
             if(con!=null){
                 String sql = "Update Reactions set reactionType=? "
-                        + "where postID=? and reactEmail like ?";
+                        + "where postID=? and reactEmail=?";
                 psm = con.prepareStatement(sql);
                 psm.setInt(1, reactionType);
                 psm.setInt(2, postID);
@@ -129,7 +129,7 @@ public class ReactionsDAO implements Serializable{
         try{
             con = DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "delete from Reactions where postID=? and reactEmail like ?";
+                String sql = "delete from Reactions where postID=? and reactEmail=?";
                 psm = con.prepareStatement(sql);
                 psm.setInt(1, postID);
                 psm.setString(2, reactEmail);                

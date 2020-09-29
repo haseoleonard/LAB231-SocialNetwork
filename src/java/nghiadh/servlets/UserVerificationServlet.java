@@ -7,21 +7,29 @@ package nghiadh.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
+import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import nghiadh.userauthentication.UserAuthenticationDAO;
+import nghiadh.users.UsersDAO;
+import nghiadh.users.UsersDTO;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author haseo
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/LogoutServlet"})
-public class LogoutServlet extends HttpServlet {
-    private static final String LOGIN_PAGE = "login.jsp";
+@WebServlet(name = "UserVerificationServlet", urlPatterns = {"/UserVerificationServlet"})
+public class UserVerificationServlet extends HttpServlet {
+    private static final Logger LOGGER = Logger.getLogger(UserVerificationServlet.class);
+    private static final int ACTIVATED_ID = 2;
+    private static final String VERIFICATION_PAGE = "AccountVerifyPage.jsp";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -35,22 +43,33 @@ public class LogoutServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        try{
-            HttpSession session = request.getSession(false);
-            if(session!=null){
-                Cookie[] cookies = request.getCookies();
-                for(Cookie cookie: cookies){
-                    if(cookie.getName().equals("username")
-                            ||cookie.getName().equals("password")){
-                        cookie.setMaxAge(0);
-                        cookie.setValue("nope");
-                        response.addCookie(cookie);
+        try {
+            String authCode = request.getParameter("txtAuthCode");
+            if (authCode != null && !authCode.isEmpty()) {
+                authCode=authCode.trim().toUpperCase();
+                HttpSession session = request.getSession(false);
+                UsersDAO usersDAO = new UsersDAO();
+                if (session != null) {
+                    UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                    UserAuthenticationDAO dao = new UserAuthenticationDAO();
+                    boolean rs = dao.checkAuthCode(loginUser.getEmail(), authCode);
+                    if(rs){
+                        usersDAO.updateStatusAccount(loginUser.getEmail(), ACTIVATED_ID);
+                        if(usersDAO.reloadLoginUser(loginUser.getEmail())){
+                            loginUser = usersDAO.getLoginUser();
+                            session.setAttribute("LOGIN_USER", loginUser);
+                        }
+                    }else{
+                        request.setAttribute("FAILED", "FAILED");
                     }
                 }
-                session.invalidate();
             }
-        }finally{
-            response.sendRedirect(LOGIN_PAGE);
+        } catch (SQLException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (NamingException ex) {
+            LOGGER.fatal(ex.getMessage());
+        } finally {
+            request.getRequestDispatcher(VERIFICATION_PAGE).forward(request, response);
             out.close();
         }
     }

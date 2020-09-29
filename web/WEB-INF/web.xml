@@ -4,46 +4,18 @@
         <filter-name>LoginAuthFilter</filter-name>
         <filter-class>nghiadh.filters.LoginAuthFilter</filter-class>
     </filter>
-    <!--    <filter>
-        <filter-name>ArticleListLoadingFilter</filter-name>
-        <filter-class>nghiadh.filters.ArticleListLoadingFilter</filter-class>
-    </filter>-->
     <filter>
         <filter-name>CreateAccountFilter</filter-name>
         <filter-class>nghiadh.filters.CreateAccountFilter</filter-class>
     </filter>
-    <!--    <servlet>
-        <servlet-name>DispatchController</servlet-name>
-        <servlet-class>nghiadh.servlets.DispatchController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>DispatchController</servlet-name>
-        <url-pattern>/DispatchController</url-pattern>
-    </servlet-mapping>-->
     <filter>
         <filter-name>CookieLoginFilter</filter-name>
         <filter-class>nghiadh.filters.CookieLoginFilter</filter-class>
     </filter>
-    <!--    <filter>
-        <filter-name>ArticleLoadFilter</filter-name>
-        <filter-class>nghiadh.filters.ArticleLoadFilter</filter-class>
-    </filter>-->
     <filter>
         <filter-name>ArticleCreateFilter</filter-name>
         <filter-class>nghiadh.filters.ArticleCreateFilter</filter-class>
     </filter>
-    <!--    <filter-mapping>
-        <filter-name>ArticleLoadFilter</filter-name>
-        <url-pattern>/ArticlePage.jsp</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>-->
-    <!--    <filter-mapping>
-        <filter-name>ArticleListLoadingFilter</filter-name>
-        <url-pattern>/ArticleListPage.jsp</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>-->
     <filter>
         <filter-name>ArticleDeleteFilter</filter-name>
         <filter-class>nghiadh.filters.ArticleDeleteFilter</filter-class>
@@ -51,6 +23,14 @@
     <filter>
         <filter-name>CommentCreateFilter</filter-name>
         <filter-class>nghiadh.filters.CommentCreateFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>AccountStatusAuthFilter</filter-name>
+        <filter-class>nghiadh.filters.AccountStatusAuthFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>NotificationLoadFilter</filter-name>
+        <filter-class>nghiadh.filters.NotificationLoadFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>LoginAuthFilter</filter-name>
@@ -60,6 +40,15 @@
     <filter-mapping>
         <filter-name>CookieLoginFilter</filter-name>
         <url-pattern>/login.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>AccountStatusAuthFilter</filter-name>
+        <url-pattern>/ArticleCreateServlet</url-pattern>
+        <url-pattern>/createArticlePage.jsp</url-pattern>
+        <url-pattern>/UserReactToPostServlet</url-pattern>
+        <url-pattern>/UserAddCommentServlet</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
@@ -87,6 +76,11 @@
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>NotificationLoadFilter</filter-name>
+        <url-pattern>/notificationsPage.jsp</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
     <listener>
         <description>ServletContextListener</description>
         <listener-class>nghiadh.listener.ServletContextListener</listener-class>
@@ -109,4 +103,8 @@
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
+    <context-param>
+        <param-name>log4j-config-dir</param-name>
+        <param-value>WEB-INF/log4j.properties</param-value>
+    </context-param>
 </web-app>

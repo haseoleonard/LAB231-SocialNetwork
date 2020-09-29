@@ -19,68 +19,118 @@ import nghiadh.utils.DBHelpers;
  *
  * @author haseo
  */
-public class UsersDAO implements Serializable{
+public class UsersDAO implements Serializable {
 //    private static final int USER_STATUS_NEW = 1;
 //    private static final int USER_STATUS_AUTHENTICATED=2;
+
     private UsersDTO loginUser;
 
     public UsersDTO getLoginUser() {
         return loginUser;
     }
-    
-    public boolean checkLogin(String username,String password) throws SQLException, NamingException{
-        Connection con = null; 
+
+    public boolean reloadLoginUser(String email) throws SQLException, NamingException {
+        Connection con = null;
         PreparedStatement psm = null;
         ResultSet rs = null;
-        try{
+        try {
             con = DBHelpers.makeConnection();
-            if(con!=null){
+            if (con != null) {
+                String sql = "select email,name,status "
+                        + "from Users "
+                        + "where email like ?";
+                psm = con.prepareStatement(sql);
+                psm.setString(1, email);
+                rs = psm.executeQuery();
+                if (rs.next()) {
+                    if (this.loginUser == null) {
+                        this.loginUser = new UsersDTO();
+                    }
+                    this.loginUser.setEmail(rs.getString("email"));
+                    this.loginUser.setName(rs.getNString("name"));
+                    this.loginUser.setStatus(rs.getInt("status"));
+                    return true;    
+                }
+            }
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (psm != null) {
+                psm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
+        }
+        return false;
+    }
+
+    public boolean checkLogin(String email, String password) throws SQLException, NamingException {
+        Connection con = null;
+        PreparedStatement psm = null;
+        ResultSet rs = null;
+        try {
+            con = DBHelpers.makeConnection();
+            if (con != null) {
                 String sql = "select email,name,status "
                         + "from Users "
                         + "where email like ? and password like ?";
                 psm = con.prepareStatement(sql);
-                psm.setString(1, username);
+                psm.setString(1, email);
                 psm.setString(2, password);
-                rs=psm.executeQuery();
-                if(rs.next()){
-                    if(this.loginUser==null)this.loginUser=new UsersDTO();
-                    loginUser.setEmail(rs.getString("email"));
-                    loginUser.setName(rs.getNString("name"));
-                    loginUser.setStatus(rs.getInt("status"));
+                rs = psm.executeQuery();
+                if (rs.next()) {
+                    if (this.loginUser == null) {
+                        this.loginUser = new UsersDTO();
+                    }
+                    this.loginUser.setEmail(rs.getString("email"));
+                    this.loginUser.setName(rs.getNString("name"));
+                    this.loginUser.setStatus(rs.getInt("status"));
                     return true;
                 }
             }
-        }finally{
-            if(rs!=null)rs.close();
-            if(psm!=null)psm.close();
-            if(con!=null)con.close();
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (psm != null) {
+                psm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
         }
         return false;
     }
-    
-    public boolean createNewAccount(String email,String password,String name) throws SQLException, NamingException{
+
+    public boolean createNewAccount(String email, String password, String name) throws SQLException, NamingException {
         Connection con = null;
         PreparedStatement psm = null;
-        try{
+        try {
             con = DBHelpers.makeConnection();
-            if(con!=null){
+            if (con != null) {
                 String sql = "insert into Users(email,name,password) values(?,?,?)";
                 psm = con.prepareStatement(sql);
                 psm.setString(1, email);
                 psm.setNString(2, name);
                 psm.setString(3, password);
-//                psm.setBoolean(4, admin);
-//                psm.setBoolean(5, status);
                 int rs = psm.executeUpdate();
-                if(rs>0)return true;
+                if (rs > 0) {
+                    return true;
+                }
             }
-        }finally{
-            if(psm!=null)psm.close();
-            if(con!=null)con.close();
+        } finally {
+            if (psm != null) {
+                psm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
         }
         return false;
     }
-    
+
 //    public boolean updateAdminAccount(String email, boolean admin) throws SQLException, NamingException{
 //        Connection con = null;
 //        PreparedStatement psm = null;
@@ -136,7 +186,6 @@ public class UsersDAO implements Serializable{
 //        }
 //        return total;
 //    }
-    
 //    public int loadNewUserList(String searchName) throws SQLException, NamingException{
 //        int total = 0;
 //        Connection con = null;
@@ -169,23 +218,29 @@ public class UsersDAO implements Serializable{
 //        return total;
 //    }
 //    
-//    public boolean updateStatusAccount(String email, int status) throws SQLException, NamingException{
-//        Connection con = null;
-//        PreparedStatement psm = null;
-//        try{
-//            con = DBHelpers.makeConnection();
-//            if(con!=null){              
-//                String sql = "Update Users set status=? where email like ?";
-//                psm = con.prepareStatement(sql);
-//                psm.setInt(1, status);
-//                psm.setString(2, email);
-//                int rs = psm.executeUpdate();
-//                if(rs>0)return true;
-//            }
-//        }finally{
-//            if(psm!=null)psm.close();
-//            if(con!=null)con.close();
-//        }
-//        return false;
-//    }
+    public boolean updateStatusAccount(String email, int status) throws SQLException, NamingException {
+        Connection con = null;
+        PreparedStatement psm = null;
+        try {
+            con = DBHelpers.makeConnection();
+            if (con != null) {
+                String sql = "Update Users set status=? where email like ?";
+                psm = con.prepareStatement(sql);
+                psm.setInt(1, status);
+                psm.setString(2, email);
+                int rs = psm.executeUpdate();
+                if (rs > 0) {
+                    return true;
+                }
+            }
+        } finally {
+            if (psm != null) {
+                psm.close();
+            }
+            if (con != null) {
+                con.close();
+            }
+        }
+        return false;
+    }
 }

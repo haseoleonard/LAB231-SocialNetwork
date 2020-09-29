@@ -6,6 +6,8 @@
 package nghiadh.comments;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.text.DateFormat;
 
 /**
  *
@@ -17,15 +19,17 @@ public class CommentsDTO implements Serializable {
     private String commenterEmail;
     private String commenterName;
     private String commentContent;
+    private Timestamp time;
 
     public CommentsDTO() {
     }
 
-    public CommentsDTO(int commentID, String commenterEmail, String commenterName, String commentContent) {
+    public CommentsDTO(int commentID, String commenterEmail, String commenterName, String commentContent,Timestamp time) {
         this.commentID = commentID;
         this.commenterEmail = commenterEmail;
         this.commenterName = commenterName;
         this.commentContent = commentContent;
+        this.time=time;
     }
 
     public int getCommentID() {
@@ -60,4 +64,13 @@ public class CommentsDTO implements Serializable {
         this.commentContent = commentContent;
     }
 
+    public String getTime() {
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(time);
+    }
+
+    public void setTime(Timestamp time) {
+        this.time = time;
+    }
+
+    
 }

@@ -9,6 +9,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 /**
  *
@@ -26,5 +28,17 @@ public final class EncodeHelper {
             hexString.insert(0, '0');
         }
         return hexString.toString();
+    }
+    
+    public static String generateNewVerificationCode(){
+        StringBuilder builder = new StringBuilder();
+        Random rand = new Random(); 
+        while(builder.length()<6){
+            int ASCII = rand.nextInt(90);
+            if((ASCII>47&&ASCII<58)||(ASCII>64&&ASCII<91)){
+                builder.append((char) ASCII);
+            }
+        }
+        return builder.toString();
     }
 }

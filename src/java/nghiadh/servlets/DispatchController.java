@@ -32,6 +32,9 @@ public class DispatchController extends HttpServlet {
     private static final String DELETE_COMMENT_CONTROLLER = "UserDeleteCommentServlet";
     private static final String USER_REACT_CONTROLLER = "UserReactToPostServlet";
     private static final String LOAD_NOTIFICATION_CONTROLLER ="NotificationLoadingServlet";
+    private static final String USER_VERIFICATION_CONTROLLER = "UserVerificationServlet";
+    private static final String RESEND_VERIFICATION_CONTROLLER = "UserVerifyCodeResendServlet";
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -70,8 +73,11 @@ public class DispatchController extends HttpServlet {
                 url=USER_REACT_CONTROLLER;
             }else if(button.equals("loadNotification")){
                 url=LOAD_NOTIFICATION_CONTROLLER;
+            }else if(button.equals("Verify")){
+                url=USER_VERIFICATION_CONTROLLER;
+            }else if(button.equals("resendAuth")){
+                url=RESEND_VERIFICATION_CONTROLLER;
             }
-            
         }finally{
             request.getRequestDispatcher(url).forward(request, response);
             if(out!=null)out.close();

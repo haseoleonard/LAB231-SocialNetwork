@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.servlet.ServletContext;
 
 /**
  *
@@ -20,7 +19,11 @@ import javax.servlet.ServletContext;
  */
 public final class FileHelpers {
     public static void writeImgToServerFile(final String imgFileName,final InputStream fileContent) throws FileNotFoundException, IOException{
-        File imgFile = new File(imgFileName);
+        File imgDir = new File("C:\\PostsImg");
+        if(!imgDir.exists()){
+            imgDir.mkdir();
+        }
+        File imgFile = new File(imgDir, imgFileName);
         FileOutputStream fos = null;
         BufferedInputStream bis = null;
         try{            
@@ -35,21 +38,21 @@ public final class FileHelpers {
         }
     }
     public static void copyImgToContextFolder(final String realPath,final String fileName) throws FileNotFoundException, IOException{
-        File inputFile = new File("D:\\PostsImg\\"+fileName);
-//        File inputFile = new File("/mnt/extern-drive-1/PostsImg/"+fileName);
-        File outputFile = new File(realPath+"\\"+fileName);
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        try{
-            fis=new FileInputStream(inputFile);
-            fos= new FileOutputStream(outputFile);
-            while(fis.available()>0){
-                fos.write(fis.read());
+        File inputFile = new File("C:\\PostsImg\\"+fileName);
+        if(inputFile.exists()){
+            File outputFile = new File(realPath+"\\"+fileName);
+            FileInputStream fis = null;
+            FileOutputStream fos = null;
+            try{
+                fis=new FileInputStream(inputFile);
+                fos= new FileOutputStream(outputFile);
+                while(fis.available()>0){
+                    fos.write(fis.read());
+                }
+            }finally{
+                if(fos!=null)fos.close();
+                if(fis!=null)fis.close();
             }
-        }finally{
-            if(fos!=null)fos.close();
-            if(fis!=null)fis.close();
         }
-        
     }
 }

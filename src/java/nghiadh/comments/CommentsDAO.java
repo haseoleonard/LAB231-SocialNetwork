@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import javax.naming.NamingException;
@@ -87,7 +88,7 @@ public class CommentsDAO implements Serializable{
         try{
             con=DBHelpers.makeConnection();
             if(con!=null){
-                String sql = "select commentID,commentEmail,commentContent,Users.name as commenterName "
+                String sql = "select commentID,commentEmail,commentContent,commentTime,Users.name as commenterName "
                         + "from Comments,Users where postID=? and commentEmail like Users.email "
                         + "Order by commentTime Desc";
                 psm = con.prepareStatement(sql);
@@ -99,7 +100,8 @@ public class CommentsDAO implements Serializable{
                     String commenterEmail = rs.getString("commentEmail");
                     String commenterName = rs.getNString("commenterName");
                     String commentContent = rs.getNString("commentContent");
-                    this.commentList.add(new CommentsDTO(commentID, commenterEmail,commenterName, commentContent));
+                    Timestamp time = rs.getTimestamp("commentTime");
+                    this.commentList.add(new CommentsDTO(commentID, commenterEmail,commenterName, commentContent,time));
                     total++;
                 }
             }

@@ -5,12 +5,11 @@
  */
 package nghiadh.servlets;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import nghiadh.posts.PostsDAO;
 import nghiadh.posts.PostsDTO;
 import nghiadh.utils.FileHelpers;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -27,6 +27,8 @@ import nghiadh.utils.FileHelpers;
  */
 @WebServlet(name = "ArticleSearchingServlet", urlPatterns = {"/ArticleSearchingServlet"})
 public class ArticleSearchingServlet extends HttpServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(ArticleSearchingServlet.class);
     private static final int DEFAULT_PAGE_NUMBER = 1;
     private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
 
@@ -43,39 +45,65 @@ public class ArticleSearchingServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
-        String searchedContent = request.getParameter("txtContent");
+        String searchedContent = request.getParameter("txtSearchContent");
         String hiddenPage = request.getParameter("hiddenPage");
+        request.setAttribute("NEXT_PAGE", ARTICLE_LIST_PAGE);
+        PostsDAO dao = new PostsDAO();
         try {
-            if (searchedContent == null||searchedContent.trim().isEmpty()) {
-                searchedContent="";
+            if (searchedContent == null || searchedContent.trim().isEmpty()) {
+                searchedContent = "";
+            } else {
+                if(searchedContent.contains("\\")){
+                    searchedContent = searchedContent.replace("\\", "\\\\");
+                }
+                if (searchedContent.contains("%")) {
+                    searchedContent = searchedContent.replace("%", "\\%");
+                }
+                if (searchedContent.contains("_")) {
+                    searchedContent = searchedContent.replace("_", "\\_");
+                }
+                if (searchedContent.contains("[")) {
+                    searchedContent = searchedContent.replace("[", "\\[");
+                }
+                if (searchedContent.contains("]")) {
+                    searchedContent = searchedContent.replace("]", "\\]");
+                }
             }
+//            LOGGER.debug(searchedContent);
+            //  
             int page = DEFAULT_PAGE_NUMBER;
-            if (hiddenPage!=null&&!hiddenPage.trim().isEmpty()) {
-                page = Integer.parseInt(hiddenPage);
-                if(page<DEFAULT_PAGE_NUMBER)page=DEFAULT_PAGE_NUMBER;
-            }
-            PostsDAO dao = new PostsDAO();
-            int rs = dao.searchPostByContent(searchedContent, page);
             int totalPage = dao.getNumberOfPageForPostWithContent(searchedContent);
-            if(rs>0){                
+            if (hiddenPage != null && !hiddenPage.trim().isEmpty() && hiddenPage.matches("\\d+")) {
+                page = Integer.parseInt(hiddenPage);
+                if (page < DEFAULT_PAGE_NUMBER) {
+                    page = DEFAULT_PAGE_NUMBER;
+                } else if (page > totalPage) {
+                    page = totalPage;
+                }
+            }
+            request.setAttribute("CURR_PAGE", page);
+            request.setAttribute("NUMBER_OF_PAGE", totalPage);
+            //
+            request.setAttribute("txtSearchValue", searchedContent);
+            int rs = dao.searchPostByContent(searchedContent, page);
+            if (rs > 0) {
                 List<PostsDTO> resultList = dao.getResultList();
+
                 request.setAttribute("RESULT_LIST", resultList);
-                request.setAttribute("NUMBER_OF_PAGE", totalPage);
+
                 String realPath = request.getServletContext().getRealPath("/PostsImg");
-                if(resultList!=null){
-                for(PostsDTO post: resultList){
-                    if(post.getImg()!=null&&!post.getImg().trim().isEmpty()){
-                        FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+                if (resultList != null) {
+                    for (PostsDTO post : resultList) {
+                        if (post.getImg() != null && !post.getImg().trim().isEmpty()) {
+                            FileHelpers.copyImgToContextFolder(realPath, post.getImg());
+                        }
                     }
                 }
             }
-            }
-        } catch (NumberFormatException ex) {
-            ex.printStackTrace();
-        } catch (SQLException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException | NumberFormatException | SQLException ex) {
+            LOGGER.error(ex.getMessage());
         } catch (NamingException ex) {
-            Logger.getLogger(ArticleSearchingServlet.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.fatal(ex.getMessage());
         } finally {
             request.getRequestDispatcher(ARTICLE_LIST_PAGE).forward(request, response);
             out.close();

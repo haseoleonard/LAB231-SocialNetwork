@@ -15,18 +15,14 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
-import nghiadh.posts.PostError;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  *
  * @author haseo
  */
-@MultipartConfig
-public class ArticleCreateFilter implements Filter {
-    private static final String CREATE_ARTICLE_PAGE = "createArticlePage.jsp";
+public class NotificationLoadFilter implements Filter {
+    private static final String LOAD_NOTI_CONTROLLER = "NotificationLoadingServlet";
     private static final boolean debug = true;
 
     // The filter configuration object we are associated with.  If
@@ -34,13 +30,13 @@ public class ArticleCreateFilter implements Filter {
     // configured. 
     private FilterConfig filterConfig = null;
     
-    public ArticleCreateFilter() {
+    public NotificationLoadFilter() {
     }    
     
     private void doBeforeProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
 //        if (debug) {
-//            log("ArticleCreateFilter:DoBeforeProcessing");
+//            log("NotificationLoadFilter:DoBeforeProcessing");
 //        }
 
         // Write code here to process the request and/or response before
@@ -68,7 +64,7 @@ public class ArticleCreateFilter implements Filter {
     private void doAfterProcessing(ServletRequest request, ServletResponse response)
             throws IOException, ServletException {
 //        if (debug) {
-//            log("ArticleCreateFilter:DoAfterProcessing");
+//            log("NotificationLoadFilter:DoAfterProcessing");
 //        }
 
         // Write code here to process the request and/or response after
@@ -104,47 +100,17 @@ public class ArticleCreateFilter implements Filter {
             throws IOException, ServletException {
         
 //        if (debug) {
-//            log("ArticleCreateFilter:doFilter()");
+//            log("NotificationLoadFilter:doFilter()");
 //        }
         
         doBeforeProcessing(request, response);
         
         Throwable problem = null;
         try {
-            PostError error = new PostError();
-            boolean foundErr = false;
-            String title = request.getParameter("txtTitle");
-            String description = request.getParameter("txtDescription");
-            String content = request.getParameter("txtContent");
-            Part filePart = ((HttpServletRequest)request).getPart("uploadImg");
-            if(title.trim().length()>100||title.trim().length()<5){
-                error.setTitleLengthErr("Title Length is required and need to be between 5-100 chars");
-                foundErr=true;
-            }
-            if(description.trim().length()>200||description.trim().length()<5){
-                error.setDescriptionLengthErr("Description Length is required and need to be between 5-200 chars");
-                foundErr=true;
-            }
-            if(content.trim().length()<20){
-                error.setContentLengthErr("Your Post's Content must be at least 20 Chracters");
-                foundErr=true;
-            }
-            if(filePart.getSize()>0){
-                if(!(filePart.getSubmittedFileName().endsWith(".jpg")
-                        ||filePart.getSubmittedFileName().endsWith(".png")
-                        ||filePart.getSubmittedFileName().endsWith(".ifif")
-                        ||filePart.getSubmittedFileName().endsWith(".jpeg")
-                        ||filePart.getSubmittedFileName().endsWith(".pjp")
-                        ||filePart.getSubmittedFileName().endsWith(".pjpeg"))){
-                    foundErr=true;
-                    error.setFileTypeIncorrectErr("Incorrect File Type Selected");
-                }
-            }
-            if(!foundErr){
-                chain.doFilter(request, response);
+            if(request.getAttribute("LOADED")==null){
+                ((HttpServletResponse)response).sendRedirect(LOAD_NOTI_CONTROLLER);
             }else{
-                request.setAttribute("ERROR", error);
-                request.getRequestDispatcher(CREATE_ARTICLE_PAGE).forward(request, response);
+                chain.doFilter(request, response);
             }
         } catch (Throwable t) {
             // If an exception is thrown somewhere down the filter chain,
@@ -198,7 +164,7 @@ public class ArticleCreateFilter implements Filter {
         this.filterConfig = filterConfig;
         if (filterConfig != null) {
 //            if (debug) {                
-//                log("ArticleCreateFilter:Initializing filter");
+//                log("NotificationLoadFilter:Initializing filter");
 //            }
         }
     }
@@ -209,9 +175,9 @@ public class ArticleCreateFilter implements Filter {
     @Override
     public String toString() {
         if (filterConfig == null) {
-            return ("ArticleCreateFilter()");
+            return ("NotificationLoadFilter()");
         }
-        StringBuffer sb = new StringBuffer("ArticleCreateFilter(");
+        StringBuffer sb = new StringBuffer("NotificationLoadFilter(");
         sb.append(filterConfig);
         sb.append(")");
         return (sb.toString());
