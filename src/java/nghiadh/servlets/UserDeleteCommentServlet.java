@@ -14,9 +14,12 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import nghiadh.NotificationEvent.NotificationEventDAO;
 import nghiadh.comments.CommentsDAO;
+import nghiadh.comments.CommentsDTO;
 import nghiadh.notifications.NotificationsDAO;
+import nghiadh.users.UsersDTO;
 import org.apache.log4j.Logger;
 
 /**
@@ -25,8 +28,10 @@ import org.apache.log4j.Logger;
  */
 @WebServlet(name = "UserDeleteCommentServlet", urlPatterns = {"/UserDeleteCommentServlet"})
 public class UserDeleteCommentServlet extends HttpServlet {
+
     private static final Logger LOGGER = Logger.getLogger(UserDeleteCommentServlet.class);
     private static final String LOAD_ARTICLE_CONTROLLER = "ArticleLoadServlet";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -41,18 +46,28 @@ public class UserDeleteCommentServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         String postID = request.getParameter("postID");
-        try{
-            String txtCommentID = request.getParameter("commentID");
-            if(txtCommentID!=null&&!txtCommentID.trim().isEmpty()){
-                int commentID=Integer.parseInt(txtCommentID);
-                CommentsDAO dao = new CommentsDAO();
-                boolean rs = dao.deleteComment(commentID);
-                if(rs){
-                    NotificationEventDAO notificationEventDAO = new NotificationEventDAO();
-                    int eventType = notificationEventDAO.getEventTypeByName("Comment");
-                    if(eventType>=0){
-                        NotificationsDAO notificationsDAO = new NotificationsDAO();
-                        notificationsDAO.removeNotification(commentID);
+        HttpSession session = request.getSession(false);
+        try {
+            if (session != null) {
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                String txtCommentID = request.getParameter("commentID");
+                if (txtCommentID != null && !txtCommentID.trim().isEmpty()) {
+                    int commentID = Integer.parseInt(txtCommentID);
+                    CommentsDAO dao = new CommentsDAO();
+                    boolean gotComment = dao.getCommentByID(commentID);
+                    if (gotComment) {
+                        CommentsDTO comment = dao.getComment();
+                        if (comment.getCommenterEmail().equals(loginUser.getEmail())) {
+                            boolean rs = dao.deleteComment(commentID);
+                            if (rs) {
+                                NotificationEventDAO notificationEventDAO = new NotificationEventDAO();
+                                int eventType = notificationEventDAO.getEventTypeByName("Comment");
+                                if (eventType >= 0) {
+                                    NotificationsDAO notificationsDAO = new NotificationsDAO();
+                                    notificationsDAO.removeNotification(commentID);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -60,8 +75,8 @@ public class UserDeleteCommentServlet extends HttpServlet {
             LOGGER.error(ex.getMessage());
         } catch (NamingException ex) {
             LOGGER.fatal(ex.getMessage());
-        }finally{
-            response.sendRedirect(LOAD_ARTICLE_CONTROLLER+"?postID="+postID);
+        } finally {
+            response.sendRedirect(LOAD_ARTICLE_CONTROLLER + "?postID=" + postID);
             out.close();
         }
     }

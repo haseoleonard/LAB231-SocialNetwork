@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpSession;
 public class LoginAuthFilter implements Filter {
     private static final String LOGIN_PAGE = "login.jsp";
     private static final boolean debug = false;
+    private static final Logger LOGGER = Logger.getLogger(LoginAuthFilter.class);
 
     // The filter configuration object we are associated with.  If
     // this value is null, this filter instance is not currently
@@ -154,7 +156,8 @@ public class LoginAuthFilter implements Filter {
         // include requests.
         RequestWrapper wrappedRequest = new RequestWrapper((HttpServletRequest) request);
         ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
-        System.out.println(((HttpServletRequest)request).getRequestURI());
+        LOGGER.info(((HttpServletRequest)request).getRequestURI());
+        //
         doBeforeProcessing(wrappedRequest, wrappedResponse);
         ServletContext context = request.getServletContext();
         List<String> guestAllowedList = (List<String>) context.getAttribute("GUEST_ALLOW_LIST");

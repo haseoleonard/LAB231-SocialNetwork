@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context path="/SocialNetwork">
+<!--    <Resource name="DB" type="javax.sql.DataSource" auth="Container"
+    driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    url="jdbc:sqlserver://localhost:1433;databaseName=SocialNetworkDB"    
+    username="sa" password="14021998"/>-->
     <Resource name="DB" type="javax.sql.DataSource" auth="Container"
     driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-    url="jdbc:sqlserver://localhost:1433;databaseName=SocialNetworkDB"
-    username="sa" password="14021998"/>
+    url="jdbc:sqlserver://haseoleonardtrace.ddns.net:1433;databaseName=SocialNetworkDB"    
+    username="sa" password="Nghia2602"/>
 </Context>

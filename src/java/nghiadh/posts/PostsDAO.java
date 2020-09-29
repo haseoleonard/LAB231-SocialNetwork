@@ -22,7 +22,7 @@ import nghiadh.utils.DBHelpers;
  */
 public class PostsDAO implements Serializable {
 
-    private static final double POST_PER_LOAD = 2;
+    private static final double POST_PER_LOAD = 20;
     private PostsDTO requestPost;
 
     public PostsDTO getRequestPost() {

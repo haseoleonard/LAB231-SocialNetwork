@@ -134,8 +134,4 @@
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"crossorigin="anonymous"></script>
     </body>
-    <iframe src="https://discordapp.com/widget?id=702422955099160656&theme=dark" 
-            width="300" height="400" allowtransparency="true" frameborder="0" class="text-center"
-            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
-    </iframe>
 </html>

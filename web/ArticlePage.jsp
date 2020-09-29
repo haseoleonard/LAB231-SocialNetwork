@@ -106,7 +106,7 @@
                                 </button>
                             </form>
                         <c:if test="${requestScope.LOADED_ARTICLE.ownerEmail eq sessionScope.LOGIN_USER.email}">
-                            <a class="btn btn-danger" href="DispatchController?btAction=Delete+Article&postID=${requestScope.LOADED_ARTICLE.postID}&ownerEmail=${requestScope.LOADED_ARTICLE.ownerEmail}" onclick="return confirm('Are you sure to delete this Article ?')">
+                            <a class="btn btn-danger" href="DispatchController?btAction=Delete+Article&postID=${requestScope.LOADED_ARTICLE.postID}" onclick="return confirm('Are you sure to delete this Article ?')">
                                 Delete Post
                             </a>
                         </c:if>
@@ -131,7 +131,6 @@
                                                 <form action="DispatchController" method="POST">
                                                     <input type="hidden" name="postID" value="${requestScope.LOADED_ARTICLE.postID}"/>
                                                     <input type="hidden" name="commentID" value="${comment.commentID}"/>
-                                                    <input type="hidden" name="commenterEmail"value="${comment.commenterEmail}"/>
                                                     <input type="submit" class="btn btn-light" name="btAction" value="Delete Comment" onclick="return confirm('Are you sure to delete this Comment ?')"/>
                                                 </form>
                                             </c:if>

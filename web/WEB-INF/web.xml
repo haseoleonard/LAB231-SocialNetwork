@@ -17,10 +17,6 @@
         <filter-class>nghiadh.filters.ArticleCreateFilter</filter-class>
     </filter>
     <filter>
-        <filter-name>ArticleDeleteFilter</filter-name>
-        <filter-class>nghiadh.filters.ArticleDeleteFilter</filter-class>
-    </filter>
-    <filter>
         <filter-name>CommentCreateFilter</filter-name>
         <filter-class>nghiadh.filters.CommentCreateFilter</filter-class>
     </filter>
@@ -49,12 +45,6 @@
         <url-pattern>/createArticlePage.jsp</url-pattern>
         <url-pattern>/UserReactToPostServlet</url-pattern>
         <url-pattern>/UserAddCommentServlet</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>FORWARD</dispatcher>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>ArticleDeleteFilter</filter-name>
-        <url-pattern>/ArticleDeleteServlet</url-pattern>
         <dispatcher>REQUEST</dispatcher>
         <dispatcher>FORWARD</dispatcher>
     </filter-mapping>
@@ -97,6 +87,10 @@
         <error-code>404</error-code>
         <location>/ResourceNotFound.jsp</location>
     </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/ServerError.jsp</location>
+    </error-page>
     <resource-ref>
         <res-ref-name>DB</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
@@ -106,5 +100,18 @@
     <context-param>
         <param-name>log4j-config-dir</param-name>
         <param-value>WEB-INF/log4j.properties</param-value>
+    </context-param>
+    <context-param>
+        <param-name>IMAGE_UPLOAD_DIR</param-name>
+        <!--<param-value>C:\\PostsImg</param-value>-->
+        <param-value>/mnt/extern-drive-1/PostsImg</param-value>
+    </context-param>
+    <context-param>
+        <param-name>HOST_EMAIL</param-name>
+        <param-value></param-value>
+    </context-param>
+    <context-param>
+        <param-name>HOST_EMAIL_PASSWORD</param-name>
+        <param-value></param-value>
     </context-param>
 </web-app>

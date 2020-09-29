@@ -20,8 +20,6 @@ import nghiadh.utils.DBHelpers;
  * @author haseo
  */
 public class UsersDAO implements Serializable {
-//    private static final int USER_STATUS_NEW = 1;
-//    private static final int USER_STATUS_AUTHENTICATED=2;
 
     private UsersDTO loginUser;
 

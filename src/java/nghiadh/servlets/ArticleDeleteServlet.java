@@ -14,7 +14,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import nghiadh.posts.PostsDAO;
+import nghiadh.posts.PostsDTO;
+import nghiadh.users.UsersDTO;
 import org.apache.log4j.Logger;
 
 /**
@@ -23,9 +26,11 @@ import org.apache.log4j.Logger;
  */
 @WebServlet(name = "ArticleDeleteServlet", urlPatterns = {"/ArticleDeleteServlet"})
 public class ArticleDeleteServlet extends HttpServlet {
+
     private static final Logger LOGGER = Logger.getLogger(ArticleDeleteServlet.class);
     private static final String LOAD_ARTICLE_CONTROLLER = "ArtcileLoadServlet";
     private static final String ARTICLE_LIST_PAGE = "ArticleListPage.jsp";
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -41,23 +46,33 @@ public class ArticleDeleteServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         String txtPostID = request.getParameter("postID");
         String url = "";
-        try{
-            if(txtPostID!=null&&!txtPostID.trim().isEmpty()){
-                url= LOAD_ARTICLE_CONTROLLER+"?postID="+txtPostID;
-            }else{
-                url = ARTICLE_LIST_PAGE;
-            }
-            int postID = Integer.parseInt(txtPostID);
-            PostsDAO dao = new PostsDAO();
-            boolean rs = dao.setPostToDelete(postID);
-            if(rs){
-                url=ARTICLE_LIST_PAGE;
+        HttpSession session = request.getSession(false);
+        PostsDAO dao = new PostsDAO();
+        try {
+            if (session != null) {
+                UsersDTO loginUser = (UsersDTO) session.getAttribute("LOGIN_USER");
+                if (txtPostID != null && !txtPostID.trim().isEmpty()) {
+                    url = LOAD_ARTICLE_CONTROLLER + "?postID=" + txtPostID;
+                } else {
+                    url = ARTICLE_LIST_PAGE;
+                }
+                int postID = Integer.parseInt(txtPostID);
+                boolean gotPost = dao.getRequestedPost(postID);
+                if (gotPost) {
+                    PostsDTO post = dao.getRequestPost();
+                    if (post.getOwnerEmail().equals(loginUser.getEmail())) {
+                        boolean rs = dao.setPostToDelete(postID);
+                        if (rs) {
+                            url = ARTICLE_LIST_PAGE;
+                        }
+                    }
+                }
             }
         } catch (NamingException ex) {
             LOGGER.fatal(ex.getMessage());
         } catch (SQLException ex) {
             LOGGER.error(ex.getMessage());
-        }finally{
+        } finally {
             request.getRequestDispatcher(url).forward(request, response);
             out.close();
         }
